@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardBackgroundColor="#FFFFFF"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <!-- INFORMACION -->
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txtFacturaNumero"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Factura #1"
+                android:textColor="#1C2340"
+                android:textSize="17sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/txtMetodo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="EFECTIVO"
+                android:textColor="#0AA87A"
+                android:textSize="13sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/txtFecha"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="12/05/2026 10:30"
+                android:textColor="#7A7A9D"
+                android:textSize="13sp"/>
+
+        </LinearLayout>
+
+        <!-- VALOR -->
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txtValor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="$50.000"
+                android:textColor="#0AA87A"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <!-- COMPROBANTE -->
+
+                <ImageButton
+                    android:id="@+id/btnComprobante"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="Ver comprobante"
+                    android:src="@drawable/ic_gallery"
+                    android:visibility="gone"
+                    app:tint="#2B6ED4"/>
+
+                <!-- ELIMINAR -->
+
+                <ImageButton
+                    android:id="@+id/btnEliminar"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="4dp"
+                    android:background="@android:color/transparent"
+                    android:contentDescription="Eliminar factura"
+                    android:src="@android:drawable/ic_menu_delete"
+                    app:tint="#D93A3A"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="deploymentTargetSelector">
+    <selectionStates>
+      <SelectionState runConfigName="app">
+        <option name="selectionMode" value="DROPDOWN" />
+        <DropdownSelection timestamp="2026-06-15T21:03:27.417465315Z">
+          <Target type="DEFAULT_BOOT">
+            <handle>
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=ZY22GKXV2B" />
+            </handle>
+          </Target>
+        </DropdownSelection>
+        <DialogSelection />
+      </SelectionState>
+      <SelectionState runConfigName="androidTest">
+        <option name="selectionMode" value="DROPDOWN" />
+        <DropdownSelection timestamp="2026-06-15T21:03:27.417465315Z">
+          <Target type="DEFAULT_BOOT">
+            <handle>
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=ZY22GKXV2B" />
+            </handle>
+          </Target>
+        </DropdownSelection>
+        <DialogSelection />
+      </SelectionState>
+      <SelectionState runConfigName="unitTest">
+        <option name="selectionMode" value="DROPDOWN" />
+        <DropdownSelection timestamp="2026-06-15T21:03:27.417465315Z">
+          <Target type="DEFAULT_BOOT">
+            <handle>
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=ZY22GKXV2B" />
+            </handle>
+          </Target>
+        </DropdownSelection>
+        <DialogSelection />
+      </SelectionState>
+      <SelectionState runConfigName="main">
+        <option name="selectionMode" value="DROPDOWN" />
+        <DropdownSelection timestamp="2026-08-23T16:47:14.920918436Z">
+          <Target type="DEFAULT_BOOT">
+            <handle>
+              <DeviceId pluginId="Wireless" identifier="serviceName=adb-R5CW620AA7A-f8iwuu" />
+            </handle>
+          </Target>
+        </DropdownSelection>
+        <DialogSelection>
+          <targets>
+            <Target type="DEFAULT_BOOT">
+              <handle>
+                <DeviceId pluginId="Wireless" identifier="serviceName=adb-R5CW620AA7A-f8iwuu" />
+              </handle>
+            </Target>
+          </targets>
+        </DialogSelection>
+      </SelectionState>
+    </selectionStates>
+  </component>
+</project>

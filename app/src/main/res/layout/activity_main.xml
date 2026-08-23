@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F0F3FA">
+
+    <!-- HEADER -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:elevation="4dp"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp"
+        android:paddingTop="40dp">
+
+        <ImageView
+            android:layout_width="300dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:scaleType="fitStart"
+            android:src="@drawable/diarix_logotipo" />
+
+        <ImageView
+            android:id="@+id/imgQr"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:padding="10dp"
+            android:background="@drawable/bg_circle_qr"
+            android:src="@drawable/ic_qr"
+            android:contentDescription="QR"
+            app:tint="#FFFFFF"/>
+
+    </LinearLayout>
+
+    <!-- CONTENIDO -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- TARJETA TOTAL -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="TOTAL DEL DÍA"
+                        android:textColor="#7A7A9D"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:id="@+id/txtTotal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="$0"
+                        android:textColor="#0AA87A"
+                        android:textSize="34sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:id="@+id/txtCantidad"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 facturas"
+                        android:textColor="#7A7A9D"/>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- FORMULARIO -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nueva Factura"
+                        android:textColor="#1C2340"
+                        android:textSize="20sp"
+                        android:textStyle="bold"/>
+
+                    <EditText
+                        android:id="@+id/edtNumeroFactura"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:hint="Número de factura"
+                        android:inputType="number"
+                        android:padding="14dp"
+                        android:textColor="#000000"
+                        android:textColorHint="#7A7A9D"/>
+
+                    <!-- botones -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:orientation="horizontal">
+
+                        <Button
+                            android:id="@+id/btnEfectivo"
+                            android:layout_width="0dp"
+                            android:layout_height="70dp"
+                            android:layout_weight="1"
+                            android:backgroundTint="#E8F8F2"
+                            android:text="Efectivo"
+                            android:textColor="#0AA87A"/>
+
+                        <Button
+                            android:id="@+id/btnTransferencia"
+                            android:layout_width="0dp"
+                            android:layout_height="70dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:backgroundTint="#EEF4FF"
+                            android:text="Transfer"
+                            android:textColor="#2B6ED4"/>
+
+                        <Button
+                            android:id="@+id/btnAmbos"
+                            android:layout_width="0dp"
+                            android:layout_height="70dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_weight="1"
+                            android:backgroundTint="#FFF7DF"
+                            android:text="Ambos"
+                            android:textColor="#B08A0A"/>
+
+                    </LinearLayout>
+
+                    <EditText
+                        android:id="@+id/edtEfectivo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:hint="Valor efectivo"
+                        android:inputType="number"
+                        android:padding="14dp"
+                        android:textColor="#000000"
+                        android:textColorHint="#7A7A9D"
+                        android:visibility="gone"/>
+
+                    <EditText
+                        android:id="@+id/edtTransferencia"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:hint="Valor transferencia"
+                        android:inputType="number"
+                        android:padding="14dp"
+                        android:textColor="#000000"
+                        android:textColorHint="#7A7A9D"
+                        android:visibility="gone"/>
+
+                    <!-- COMPROBANTE DE TRANSFERENCIA -->
+                    <LinearLayout
+                        android:id="@+id/layoutComprobante"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <!-- TÍTULO -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Comprobante de transferencia"
+                            android:textColor="#1C2340"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textColor="#7A8194"
+                            android:textSize="13sp" />
+
+                        <!-- CUADRO PARA CARGAR DESDE GALERÍA -->
+                        <LinearLayout
+                            android:id="@+id/btnSeleccionarComprobante"
+                            android:layout_width="match_parent"
+                            android:layout_height="140dp"
+                            android:layout_marginTop="12dp"
+                            android:background="@drawable/bg_comprobante"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="12dp">
+
+                            <ImageView
+                                android:layout_width="38dp"
+                                android:layout_height="38dp"
+                                android:contentDescription="Cargar imagen"
+                                android:src="@drawable/ic_gallery" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="7dp"
+                                android:text="Cargar comprobante"
+                                android:textColor="#1C2340"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="3dp"
+                                android:gravity="center"
+                                android:text="Seleccionar una imagen de la galería"
+                                android:textColor="#7A8194"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                        <ImageView
+                            android:id="@+id/imgComprobante"
+                            android:layout_width="match_parent"
+                            android:layout_height="140dp"
+                            android:layout_marginTop="12dp"
+                            android:background="@drawable/bg_comprobante"
+                            android:contentDescription="Vista previa del comprobante"
+                            android:scaleType="centerCrop"
+                            android:visibility="gone" />
+
+                        <Button
+                            android:id="@+id/btnCambiarComprobante"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:layout_marginTop="10dp"
+                            android:backgroundTint="#6C757D"
+                            android:text="Cambiar comprobante"
+                            android:textAllCaps="false"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:visibility="gone" />
+
+                        <!-- BOTÓN PARA TOMAR FOTO -->
+                        <Button
+                            android:id="@+id/btnTomarFoto"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:layout_marginTop="10dp"
+                            android:backgroundTint="#2B6ED4"
+                            android:drawableStart="@drawable/ic_camera"
+                            android:drawablePadding="8dp"
+                            android:gravity="center"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:text="Tomar foto"
+                            android:textAllCaps="false"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <!-- VISTA PREVIA DEL COMPROBANTE -->
+
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/txtTotalRegistro"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:text="Total: $0"
+                        android:textColor="#0AA87A"
+                        android:textSize="24sp"
+                        android:textStyle="bold"/>
+
+                    <Button
+                        android:id="@+id/btnGuardar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:backgroundTint="#0AA87A"
+                        android:text="Guardar Factura"
+                        android:textAllCaps="false"
+                        android:textColor="#FFFFFF"/>
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- BOTTOM NAV -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_bottom_menu"
+        android:elevation="12dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="20dp"
+        app:itemIconSize="24dp"
+        app:itemIconTint="@color/menu_colors"
+        app:itemTextColor="@color/menu_colors"
+        app:labelVisibilityMode="selected"
+        app:menu="@menu/menu_bottom"/>
+
+</LinearLayout>

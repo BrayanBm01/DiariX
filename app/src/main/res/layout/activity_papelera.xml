@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F0F3FA">
+
+    <!-- HEADER -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:orientation="horizontal"
+        android:elevation="4dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp"
+        android:paddingTop="40dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Papelera"
+            android:textColor="#1C2340"
+            android:textSize="24sp"
+            android:textStyle="bold"/>
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerPapelera"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_bottom_menu"
+        android:elevation="12dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="20dp"
+        app:itemIconSize="24dp"
+        app:itemIconTint="@color/menu_colors"
+        app:itemTextColor="@color/menu_colors"
+        app:labelVisibilityMode="selected"
+        app:menu="@menu/menu_bottom"/>
+
+</LinearLayout>

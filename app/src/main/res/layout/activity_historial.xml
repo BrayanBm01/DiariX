@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F0F3FA">
+
+    <!-- HEADER -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:elevation="4dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingTop="40dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Historial del Día"
+            android:textColor="#1C2340"
+            android:textSize="26sp"
+            android:textStyle="bold"/>
+
+    </LinearLayout>
+
+    <!-- CONTENIDO -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- ESTADISTICAS -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- FILA 1 -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <!-- TOTAL FACTURAS -->
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="16dp"
+                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardElevation="2dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="FACTURAS"
+                            android:textStyle="bold"
+                            android:textColor="#7A7A9D"/>
+
+                        <TextView
+                            android:id="@+id/txtCantidadHistorial"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textSize="28sp"
+                            android:textStyle="bold"
+                            android:textColor="#1C2340"/>
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <!-- TOTAL DINERO -->
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardElevation="2dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="TOTAL"
+                            android:textStyle="bold"
+                            android:textColor="#7A7A9D"/>
+
+                        <TextView
+                            android:id="@+id/txtTotalHistorial"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="$0"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            android:textColor="#0AA87A"/>
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+            </LinearLayout>
+
+            <!-- FILA 2 -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <!-- TOTAL EFECTIVO -->
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="16dp"
+                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardElevation="2dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="EFECTIVO"
+                            android:textStyle="bold"
+                            android:textColor="#7A7A9D"/>
+
+                        <TextView
+                            android:id="@+id/txtFacturasEfectivo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="$0"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            android:textColor="#0AA87A"/>
+
+                        <TextView
+                            android:id="@+id/txtCantidadEfectivo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="0 facturas"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:textColor="#7A7A9D"/>
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <!-- TOTAL TRANSFERENCIA -->
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardElevation="2dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="TRANSFERENCIA"
+                            android:textStyle="bold"
+                            android:textColor="#7A7A9D"/>
+
+                        <TextView
+                            android:id="@+id/txtFacturasTransferencia"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="$0"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            android:textColor="#2B6ED4"/>
+
+                        <TextView
+                            android:id="@+id/txtCantidadTransferencia"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="0 facturas"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:textColor="#7A7A9D"/>
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- CONTENEDOR LISTA -->
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="20dp"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardElevation="2dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerHistorial"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#FFFFFF"
+                android:clipToPadding="false"
+                android:padding="12dp"
+                android:scrollbars="vertical"/>
+
+        </androidx.cardview.widget.CardView>
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNav"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_bottom_menu"
+            android:elevation="12dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="20dp"
+            app:itemIconSize="24dp"
+            app:itemIconTint="@color/menu_colors"
+            app:itemTextColor="@color/menu_colors"
+            app:labelVisibilityMode="selected"
+            app:menu="@menu/menu_bottom"/>
+
+    </LinearLayout>
+
+</LinearLayout>
