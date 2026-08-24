@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.totaldiaria.ConfiguracionActivity
 import com.example.totaldiaria.HistorialActivity
 import com.example.totaldiaria.MainActivity
-import com.example.totaldiaria.PapeleraActivity
+import com.example.totaldiaria.EstadisticasActivity
 import com.example.totaldiaria.RegistrosActivity
 import com.example.totaldiaria.R
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -73,7 +73,7 @@ object BottomNavigator {
             R.id.nav_inicio -> MainActivity::class.java
             R.id.nav_registros -> RegistrosActivity::class.java
             R.id.nav_historial -> HistorialActivity::class.java
-            R.id.nav_papelera -> PapeleraActivity::class.java
+            R.id.nav_estadisticas -> EstadisticasActivity::class.java
             R.id.nav_configuracion -> ConfiguracionActivity::class.java
 
             else -> null

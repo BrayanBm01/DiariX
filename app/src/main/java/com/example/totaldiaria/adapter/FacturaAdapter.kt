@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.totaldiaria.R
 import com.example.totaldiaria.models.Factura
+import com.example.totaldiaria.ui.FormatoHora
 import com.example.totaldiaria.ui.FormatoMoneda
 import com.example.totaldiaria.ui.ComprobanteDialog
 import androidx.core.content.ContextCompat
@@ -114,7 +115,7 @@ class FacturaAdapter(
         }
 
         holder.txtFecha.text =
-            factura.fecha
+            FormatoHora.fechaConHora12(factura.fecha)
 
         holder.txtValor.text =
             FormatoMoneda.formatear(total)

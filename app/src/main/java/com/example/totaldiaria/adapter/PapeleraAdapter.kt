@@ -23,12 +23,6 @@ class PapeleraAdapter(
         val txtCantidad: TextView =
             view.findViewById(R.id.txtCantidad)
 
-        val txtEfectivo: TextView =
-            view.findViewById(R.id.txtEfectivo)
-
-        val txtTransferencia: TextView =
-            view.findViewById(R.id.txtTransferencia)
-
         val txtTotal: TextView =
             view.findViewById(R.id.txtTotal)
 
@@ -63,13 +57,7 @@ class PapeleraAdapter(
             item.fecha
 
         holder.txtCantidad.text =
-            item.cantidadFacturas.toString()
-
-        holder.txtEfectivo.text =
-            FormatoMoneda.formatear(item.efectivo)
-
-        holder.txtTransferencia.text =
-            FormatoMoneda.formatear(item.transferencia)
+            "${item.cantidadFacturas} facturas"
 
         holder.txtTotal.text =
             FormatoMoneda.formatear(item.total)

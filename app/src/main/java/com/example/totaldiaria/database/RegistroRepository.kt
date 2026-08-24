@@ -28,6 +28,30 @@ class RegistroRepository(context: Context) {
             "SELECT * FROM registros ORDER BY id DESC"
         )
 
+    /**
+     * Cantidad de registros diarios activos (no cuenta papelera).
+     */
+    fun contarRegistros(): Int {
+
+        val db = dbHelper.readableDatabase
+
+        var total = 0
+
+        val cursor = db.rawQuery(
+            "SELECT COUNT(*) FROM registros",
+            null
+        )
+
+        if (cursor.moveToFirst()) {
+            total = cursor.getInt(0)
+        }
+
+        cursor.close()
+        db.close()
+
+        return total
+    }
+
     fun obtenerRegistrosPorFecha(
         fecha: String
     ): MutableList<PapeleraItem> =

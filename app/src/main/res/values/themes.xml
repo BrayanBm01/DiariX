@@ -6,4 +6,24 @@
     </style>
 
     <style name="Theme.TotalDiaria" parent="Base.Theme.TotalDiaria" />
+
+    <!-- Apariencia del texto de las pestañas de Registros. -->
+    <style name="TextoPestanaRegistros" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="textAllCaps">false</item>
+    </style>
+
+    <!-- Menú inferior compacto compartido por todas las pantallas. -->
+    <style name="MenuInferiorCompacto" parent="Widget.Material3.BottomNavigationView">
+        <item name="android:background">@drawable/bg_bottom_menu</item>
+        <item name="android:elevation">12dp</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="itemIconSize">22dp</item>
+        <item name="itemIconTint">@color/menu_colors</item>
+        <item name="itemTextColor">@color/menu_colors</item>
+        <item name="labelVisibilityMode">selected</item>
+    </style>
 </resources>

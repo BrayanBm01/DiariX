@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import com.example.totaldiaria.service.ComprobanteStore
 
 /**
  * Encapsula la adquisición del comprobante de transferencia:
@@ -34,6 +35,8 @@ class ComprobanteController(
 
     var uriFotoComprobante: Uri? = null
         private set
+
+    private val almacenComprobantes = ComprobanteStore(activity)
 
     private val camaraLauncher =
         activity.registerForActivityResult(
@@ -63,7 +66,24 @@ class ComprobanteController(
 
             if (uri != null) {
 
-                uriComprobante = uri
+                // El permiso sobre el URI del selector puede perderse
+                // al cerrar la app; se conserva una copia interna.
+                val copia = almacenComprobantes.guardarCopia(uri)
+
+                if (copia != null) {
+
+                    uriComprobante = copia
+
+                } else {
+
+                    uriComprobante = uri
+
+                    Toast.makeText(
+                        activity,
+                        "No se pudo guardar una copia del comprobante",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
 
                 mostrarComprobanteSeleccionado()
             }

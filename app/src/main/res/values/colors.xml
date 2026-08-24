@@ -5,4 +5,6 @@
     <color name="verde_pago">#0AA87A</color>
     <color name="azul_pago">#2196F3</color>
     <color name="naranja_pago">#FF9800</color>
+    <color name="gris_etiqueta">#7A7A9D</color>
+    <color name="texto_principal_dark">#1C2340</color>
 </resources>

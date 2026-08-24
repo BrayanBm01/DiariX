@@ -1,8 +1,8 @@
 package com.example.totaldiaria.service
 
 import android.content.Context
+import com.example.totaldiaria.database.DatabaseHelper
 import com.example.totaldiaria.database.FacturaRepository
-import com.example.totaldiaria.database.PapeleraRepository
 import com.example.totaldiaria.database.RegistroRepository
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -14,11 +14,10 @@ import java.util.Locale
  *     y se marcan como ARCHIVADA.
  *  2. Los registros que exceden el límite de días se mueven a la papelera.
  */
-class CierreDiarioService(context: Context) {
+class CierreDiarioService(private val context: Context) {
 
     private val facturaRepository = FacturaRepository(context)
     private val registroRepository = RegistroRepository(context)
-    private val papeleraRepository = PapeleraRepository(context)
 
     fun archivarFacturasDeDiasAnteriores() {
 
@@ -71,31 +70,69 @@ class CierreDiarioService(context: Context) {
         facturaRepository.marcarComoArchivadasAnterioresA(hoy)
     }
 
-    fun moverRegistrosExcedentesAPapelera() {
+    /**
+     * Ciclo de registros diarios.
+     *
+     * Un "registro diario" es una fila de la tabla registros creada
+     * por el cierre (una por cierre, no por factura). Se conservan los
+     * últimos [LIMITE_REGISTROS]; cuando un cierre nuevo hace superar
+     * ese límite, todo el ciclo anterior completo pasa a la tabla
+     * papelera y el registro más reciente inicia el ciclo siguiente.
+     *
+     * Todo el movimiento ocurre en una transacción: o se archiva el
+     * ciclo completo o no se toca nada.
+     */
+    fun aplicarCicloRegistros() {
 
-        val lista =
-            registroRepository.obtenerRegistros()
+        val db =
+            DatabaseHelper(context).writableDatabase
 
-        if (lista.size <= LIMITE_REGISTROS)
-            return
+        db.beginTransaction()
 
-        val sobrantes =
-            lista.dropLast(LIMITE_REGISTROS)
+        try {
 
-        for (item in sobrantes) {
-
-            papeleraRepository.guardarEnPapelera(
-                item.fecha,
-                item.cantidadFacturas,
-                item.efectivo,
-                item.transferencia,
-                item.total,
-                item.cantidadEfectivo,
-                item.cantidadTransferencia
+            val cursor = db.rawQuery(
+                "SELECT COUNT(*) FROM registros",
+                null
             )
-        }
 
-        registroRepository.eliminarRegistrosExcedentes(LIMITE_REGISTROS)
+            val cantidad =
+                if (cursor.moveToFirst()) cursor.getInt(0) else 0
+
+            cursor.close()
+
+            if (cantidad > LIMITE_REGISTROS) {
+
+                db.execSQL(
+                    """
+                    INSERT INTO papelera(
+                        fecha, cantidad, efectivo, transferencia,
+                        total, cantidadEfectivo, cantidadTransferencia
+                    )
+                    SELECT fecha, cantidad, efectivo, transferencia,
+                           total, cantidadEfectivo, cantidadTransferencia
+                    FROM registros
+                    WHERE id <> (SELECT MAX(id) FROM registros)
+                    ORDER BY id ASC
+                    """.trimIndent()
+                )
+
+                db.execSQL(
+                    """
+                    DELETE FROM registros
+                    WHERE id <> (SELECT MAX(id) FROM registros)
+                    """.trimIndent()
+                )
+            }
+
+            db.setTransactionSuccessful()
+
+        } finally {
+
+            db.endTransaction()
+
+            db.close()
+        }
     }
 
     companion object {

@@ -18,9 +18,9 @@
         android:title="Inicio"/>
 
     <item
-        android:id="@+id/nav_papelera"
-        android:icon="@drawable/ic_delete"
-        android:title="Papelera"/>
+        android:id="@+id/nav_estadisticas"
+        android:icon="@drawable/ic_estadisticas"
+        android:title="Estadíst."/>
 
     <item
         android:id="@+id/nav_configuracion"

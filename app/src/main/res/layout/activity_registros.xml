@@ -15,12 +15,11 @@
         android:layout_height="wrap_content"
         android:background="#FFFFFF"
         android:elevation="4dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:paddingStart="20dp"
         android:paddingTop="40dp"
         android:paddingEnd="20dp"
-        android:paddingBottom="16dp">
+        android:paddingBottom="14dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -30,11 +29,56 @@
             android:textSize="26sp"
             android:textStyle="bold"/>
 
+        <TextView
+            android:id="@+id/txtContadorRegistros"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="0 días registrados"
+            android:textColor="#7A7A9D"
+            android:textSize="13sp"
+            android:textStyle="bold"/>
+
     </LinearLayout>
 
-    <!-- FILTRO FECHA -->
+    <!-- PESTAÑAS -->
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayoutRegistros"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="6dp"
+        android:background="#FFFFFF"
+        app:tabIndicator="@drawable/bg_tab_seleccionada"
+        app:tabIndicatorColor="#0AA87A"
+        app:tabIndicatorFullWidth="false"
+        app:tabIndicatorGravity="stretch"
+        app:tabIndicatorHeight="40dp"
+        app:tabMode="fixed"
+        app:tabGravity="fill"
+        app:tabRippleColor="#00000000"
+        app:tabTextAppearance="@style/TextoPestanaRegistros"
+        app:tabTextColor="#7A7A9D"
+        app:tabSelectedTextColor="#FFFFFF"
+        app:tabPaddingStart="12dp"
+        app:tabPaddingEnd="12dp">
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Registros diarios"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Papelera"/>
+
+    </com.google.android.material.tabs.TabLayout>
+
+    <!-- FILTRO FECHA (solo pestaña registros) -->
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/cardFiltroFecha"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
@@ -66,28 +110,53 @@
 
     </androidx.cardview.widget.CardView>
 
-    <!-- LISTA -->
+    <!-- LISTAS -->
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerRegistros"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerRegistros"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <TextView
+            android:id="@+id/txtVacioRegistros"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Aún no hay registros diarios"
+            android:textColor="#7A7A9D"
+            android:textSize="15sp"
+            android:visibility="gone"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerPapelera"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/txtVaciaPapelera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="La papelera está vacía"
+            android:textColor="#7A7A9D"
+            android:textSize="15sp"
+            android:visibility="gone"/>
+
+    </FrameLayout>
 
     <!-- MENU INFERIOR -->
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
+        style="@style/MenuInferiorCompacto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_bottom_menu"
-        android:elevation="12dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="20dp"
-        app:itemIconSize="24dp"
-        app:itemIconTint="@color/menu_colors"
-        app:itemTextColor="@color/menu_colors"
-        app:labelVisibilityMode="selected"
         app:menu="@menu/menu_bottom"/>
 
 </LinearLayout>

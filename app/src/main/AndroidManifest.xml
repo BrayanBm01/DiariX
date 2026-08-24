@@ -47,9 +47,8 @@
             android:exported="false"/>
 
         <activity
-            android:name=".PapeleraActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize"/>
+            android:name=".EstadisticasActivity"
+            android:exported="false"/>
 
         <activity
             android:name=".ConfiguracionActivity"

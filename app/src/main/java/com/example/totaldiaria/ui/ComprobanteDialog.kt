@@ -7,66 +7,112 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
+import android.util.Log
 import android.widget.ImageView
 import android.widget.Toast
 import com.example.totaldiaria.R
+import java.io.FileNotFoundException
 
 object ComprobanteDialog {
+
+    private const val TAG = "Comprobante"
 
     private const val MAX_LADO = 1200
 
     fun mostrar(context: Context, uriComprobante: String?) {
 
-        if (uriComprobante.isNullOrEmpty()) return
+        if (uriComprobante.isNullOrEmpty()) {
+
+            Log.w(TAG, "Sin comprobante: valor='$uriComprobante'")
+
+            Toast.makeText(
+                context,
+                "Esta factura no tiene comprobante",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            return
+        }
 
         try {
 
             val uri = Uri.parse(uriComprobante)
 
+            Log.i(TAG, "Abriendo comprobante uri=$uri")
+
             val bitmap = decodificarReduzido(context, uri)
 
             if (bitmap == null) {
 
+                Log.w(TAG, "Bitmap nulo para uri=$uri")
+
                 Toast.makeText(
                     context,
-                    "No se pudo cargar la imagen",
-                    Toast.LENGTH_SHORT
+                    "El archivo del comprobante no es una imagen válida",
+                    Toast.LENGTH_LONG
                 ).show()
 
                 return
             }
 
-            val dialog = Dialog(context)
+            mostrarDialogo(context, bitmap)
 
-            dialog.setContentView(R.layout.dialog_qr)
+        } catch (e: FileNotFoundException) {
 
-            dialog.window?.setBackgroundDrawable(
-                ColorDrawable(Color.TRANSPARENT)
-            )
+            Log.w(TAG, "Archivo no encontrado: $uriComprobante", e)
 
-            val imagen =
-                dialog.findViewById<ImageView>(R.id.imgQrGrande)
+            Toast.makeText(
+                context,
+                "El archivo del comprobante ya no está disponible",
+                Toast.LENGTH_LONG
+            ).show()
 
-            imagen.scaleType = ImageView.ScaleType.FIT_CENTER
+        } catch (e: SecurityException) {
 
-            imagen.setImageBitmap(bitmap)
+            Log.w(TAG, "Sin permiso para leer: $uriComprobante", e)
 
-            dialog.setCanceledOnTouchOutside(true)
+            Toast.makeText(
+                context,
+                "No hay permiso para acceder al comprobante",
+                Toast.LENGTH_LONG
+            ).show()
 
-            imagen.setOnClickListener {
-                dialog.dismiss()
-            }
+        } catch (e: Exception) {
 
-            dialog.show()
-
-        } catch (_: Exception) {
+            Log.w(TAG, "Error abriendo comprobante: $uriComprobante", e)
 
             Toast.makeText(
                 context,
                 "Error al abrir el comprobante",
-                Toast.LENGTH_SHORT
+                Toast.LENGTH_LONG
             ).show()
         }
+    }
+
+    private fun mostrarDialogo(context: Context, bitmap: Bitmap) {
+
+        val dialog = Dialog(context)
+
+        dialog.setContentView(R.layout.dialog_qr)
+
+        dialog.window?.setBackgroundDrawable(
+            ColorDrawable(Color.TRANSPARENT)
+        )
+
+        val imagen =
+            dialog.findViewById<ImageView>(R.id.imgQrGrande)
+
+        imagen.scaleType = ImageView.ScaleType.FIT_CENTER
+
+        imagen.setImageBitmap(bitmap)
+
+        dialog.setCanceledOnTouchOutside(true)
+
+        imagen.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     private fun decodificarReduzido(
@@ -78,7 +124,7 @@ object ComprobanteDialog {
             inJustDecodeBounds = true
         }
 
-        context.contentResolver.openInputStream(uri)?.use { stream ->
+        abrirStream(context, uri)?.use { stream ->
 
             BitmapFactory.decodeStream(stream, null, limites)
         }
@@ -97,9 +143,29 @@ object ComprobanteDialog {
             inPreferredConfig = Bitmap.Config.RGB_565
         }
 
-        return context.contentResolver.openInputStream(uri)?.use { stream ->
+        return abrirStream(context, uri)?.use { stream ->
 
             BitmapFactory.decodeStream(stream, null, opciones)
         }
+    }
+
+    /**
+     * Los comprobantes pueden ser content:// (filas antiguas),
+     * file:// (copias internas) o una ruta absoluta.
+     */
+    private fun abrirStream(context: Context, uri: Uri) = try {
+
+        when (uri.scheme) {
+
+            "file" -> java.io.File(uri.path ?: "").inputStream()
+
+            null -> java.io.File(uri.toString()).inputStream()
+
+            else -> context.contentResolver.openInputStream(uri)
+        }
+
+    } catch (e: FileNotFoundException) {
+
+        throw e
     }
 }

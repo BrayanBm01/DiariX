@@ -121,7 +121,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="18dp"
                         android:backgroundTint="#2B6ED4"
-                        android:text="Exportar CSV"
+                        android:text="Exportar respaldo"
                         android:textAllCaps="false"
                         android:textColor="#FFFFFF"/>
 
@@ -131,7 +131,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:backgroundTint="#FF9800"
-                        android:text="Importar CSV"
+                        android:text="Importar respaldo"
                         android:textAllCaps="false"
                         android:textColor="#FFFFFF"/>
 
@@ -145,16 +145,9 @@
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
+        style="@style/MenuInferiorCompacto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_bottom_menu"
-        android:elevation="12dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="20dp"
-        app:itemIconSize="24dp"
-        app:itemIconTint="@color/menu_colors"
-        app:itemTextColor="@color/menu_colors"
-        app:labelVisibilityMode="selected"
         app:menu="@menu/menu_bottom"/>
 
 </LinearLayout>

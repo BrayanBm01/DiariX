@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         qrManager = QrManager(this)
 
         cierreDiarioService.archivarFacturasDeDiasAnteriores()
-        cierreDiarioService.moverRegistrosExcedentesAPapelera()
+        cierreDiarioService.aplicarCicloRegistros()
 
         restaurarEstado(savedInstanceState)
 
