@@ -48,6 +48,8 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_marginTop="6dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:background="#FFFFFF"
         app:tabIndicator="@drawable/bg_tab_seleccionada"
         app:tabIndicatorColor="#0AA87A"
@@ -60,8 +62,8 @@
         app:tabTextAppearance="@style/TextoPestanaRegistros"
         app:tabTextColor="#7A7A9D"
         app:tabSelectedTextColor="#FFFFFF"
-        app:tabPaddingStart="12dp"
-        app:tabPaddingEnd="12dp">
+        app:tabPaddingStart="20dp"
+        app:tabPaddingEnd="20dp">
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"

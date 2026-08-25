@@ -38,6 +38,10 @@ class EstadisticasActivity : AppCompatActivity() {
     private lateinit var txtVaciosMetodos: TextView
     private lateinit var contenedorLeyenda: LinearLayout
     private lateinit var cardComparacion: View
+    private lateinit var cardFacturasPorMetodo: View
+    private lateinit var txtCantSoloEfectivo: TextView
+    private lateinit var txtCantSoloTransferencia: TextView
+    private lateinit var txtCantAmbos: TextView
 
     private val botonesFiltro = mutableMapOf<Periodo, TextView>()
 
@@ -71,6 +75,10 @@ class EstadisticasActivity : AppCompatActivity() {
         txtVaciosMetodos = findViewById(R.id.txtVaciosMetodos)
         contenedorLeyenda = findViewById(R.id.contenedorLeyenda)
         cardComparacion = findViewById(R.id.cardComparacion)
+        cardFacturasPorMetodo = findViewById(R.id.cardFacturasPorMetodo)
+        txtCantSoloEfectivo = findViewById(R.id.txtCantSoloEfectivo)
+        txtCantSoloTransferencia = findViewById(R.id.txtCantSoloTransferencia)
+        txtCantAmbos = findViewById(R.id.txtCantAmbos)
 
         botonesFiltro[Periodo.HOY] = findViewById(R.id.btnFiltroHoy)
         botonesFiltro[Periodo.ULTIMOS_7] = findViewById(R.id.btnFiltro7)
@@ -87,6 +95,12 @@ class EstadisticasActivity : AppCompatActivity() {
         BottomNavigator.configurar(this, R.id.nav_estadisticas)
 
         seleccionarPeriodo(Periodo.HOY)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        BottomNavigator.sincronizarPestana(this, R.id.nav_estadisticas)
+        cargarEstadisticas()
     }
 
     // ------------------------------------------------------------------
@@ -145,6 +159,14 @@ class EstadisticasActivity : AppCompatActivity() {
             resumen.mejorDiaFecha
                 ?.let { estadisticasService.etiquetaCorta(it) }
                 ?: "—"
+
+        txtCantSoloEfectivo.text = resumen.cantidadSoloEfectivo.toString()
+        txtCantSoloTransferencia.text = resumen.cantidadSoloTransferencia.toString()
+        txtCantAmbos.text = resumen.cantidadAmbos.toString()
+
+        val hayFacturasPorMetodo = resumen.totalFacturas > 0
+        cardFacturasPorMetodo.visibility =
+            if (hayFacturasPorMetodo) View.VISIBLE else View.GONE
 
         pintarGraficasDiarias(resumen)
 

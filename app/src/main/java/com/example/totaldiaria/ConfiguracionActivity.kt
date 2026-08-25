@@ -103,6 +103,12 @@ class ConfiguracionActivity : AppCompatActivity() {
         BottomNavigator.configurar(this, R.id.nav_configuracion)
     }
 
+    override fun onResume() {
+        super.onResume()
+        BottomNavigator.sincronizarPestana(this, R.id.nav_configuracion)
+        mostrarEstadoQr(qrManager.existeQr())
+    }
+
     // ------------------------------------------------------------------
     // Exportación
     // ------------------------------------------------------------------

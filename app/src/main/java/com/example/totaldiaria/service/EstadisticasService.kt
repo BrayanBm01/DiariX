@@ -109,7 +109,10 @@ class EstadisticasService(private val context: Context) {
         val metodosPago: List<MetodoPago>,
         val actividadPorDia: List<ActividadDia>,
         val mejorDiaFecha: String?,
-        val mejorDiaTotal: Double
+        val mejorDiaTotal: Double,
+        val cantidadSoloEfectivo: Int,
+        val cantidadSoloTransferencia: Int,
+        val cantidadAmbos: Int
     )
 
     // ------------------------------------------------------------------
@@ -131,8 +134,9 @@ class EstadisticasService(private val context: Context) {
                     COALESCE(SUM(efectivo + transferencia), 0),
                     COALESCE(SUM(efectivo), 0),
                     COALESCE(SUM(transferencia), 0),
-                    COALESCE(SUM(CASE WHEN efectivo > 0 THEN 1 ELSE 0 END), 0),
-                    COALESCE(SUM(CASE WHEN transferencia > 0 THEN 1 ELSE 0 END), 0)
+                    COALESCE(SUM(CASE WHEN efectivo > 0 AND transferencia = 0 THEN 1 ELSE 0 END), 0),
+                    COALESCE(SUM(CASE WHEN transferencia > 0 AND efectivo = 0 THEN 1 ELSE 0 END), 0),
+                    COALESCE(SUM(CASE WHEN efectivo > 0 AND transferencia > 0 THEN 1 ELSE 0 END), 0)
                 FROM facturas
                 WHERE $condicion
                 """.trimIndent(),
@@ -149,9 +153,11 @@ class EstadisticasService(private val context: Context) {
 
             val transferenciaTotal = cursor.getDouble(3)
 
-            val cantidadEfectivo = cursor.getInt(4)
+            val cantidadSoloEfectivo = cursor.getInt(4)
 
-            val cantidadTransferencia = cursor.getInt(5)
+            val cantidadSoloTransferencia = cursor.getInt(5)
+
+            val cantidadAmbos = cursor.getInt(6)
 
             cursor.close()
 
@@ -165,7 +171,7 @@ class EstadisticasService(private val context: Context) {
                 MetodoPago(
                     nombre = "Efectivo",
                     monto = efectivoTotal,
-                    cantidadFacturas = cantidadEfectivo,
+                    cantidadFacturas = cantidadSoloEfectivo + cantidadAmbos,
                     porcentaje = porcentaje(
                         efectivoTotal,
                         ingresosTotales
@@ -175,7 +181,7 @@ class EstadisticasService(private val context: Context) {
                 MetodoPago(
                     nombre = "Transferencia",
                     monto = transferenciaTotal,
-                    cantidadFacturas = cantidadTransferencia,
+                    cantidadFacturas = cantidadSoloTransferencia + cantidadAmbos,
                     porcentaje = porcentaje(
                         transferenciaTotal,
                         ingresosTotales
@@ -196,7 +202,10 @@ class EstadisticasService(private val context: Context) {
                 metodosPago = metodos,
                 actividadPorDia = dias,
                 mejorDiaFecha = mejorDia?.fecha,
-                mejorDiaTotal = mejorDia?.total ?: 0.0
+                mejorDiaTotal = mejorDia?.total ?: 0.0,
+                cantidadSoloEfectivo = cantidadSoloEfectivo,
+                cantidadSoloTransferencia = cantidadSoloTransferencia,
+                cantidadAmbos = cantidadAmbos
             )
 
         } finally {

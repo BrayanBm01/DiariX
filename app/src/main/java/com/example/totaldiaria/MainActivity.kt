@@ -75,6 +75,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
+        BottomNavigator.sincronizarPestana(this, R.id.nav_inicio)
         actualizarDashboard()
     }
 

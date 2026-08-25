@@ -48,6 +48,12 @@ class HistorialActivity : AppCompatActivity() {
         cargarFacturas()
     }
 
+    override fun onResume() {
+        super.onResume()
+        BottomNavigator.sincronizarPestana(this, R.id.nav_historial)
+        cargarFacturas()
+    }
+
     private fun vincularVistas() {
 
         recyclerHistorial =

@@ -108,7 +108,10 @@ class RegistrosActivity : AppCompatActivity() {
 
         super.onResume()
 
+        BottomNavigator.sincronizarPestana(this, R.id.nav_registros)
         actualizarContador()
+        cargarRegistros()
+        cargarPapelera()
     }
 
     /**
