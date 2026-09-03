@@ -15,14 +15,24 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = rootProject.file("totaldiaria-release.jks")
+            storePassword = providers.gradleProperty("TOTALDIARIA_STORE_PASSWORD").get()
+            keyAlias = providers.gradleProperty("TOTALDIARIA_KEY_ALIAS").get()
+            keyPassword = providers.gradleProperty("TOTALDIARIA_KEY_PASSWORD").get()
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

@@ -2,9 +2,15 @@
 build/
 **/build/
 local.properties
+
 .idea/
 *.iml
+
 .DS_Store
 .externalNativeBuild/
 .cxx/
 captures/
+
+# Claves privadas de firma Android
+*.jks
+*.keystore
