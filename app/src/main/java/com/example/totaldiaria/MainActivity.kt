@@ -15,6 +15,7 @@ import com.example.totaldiaria.models.Factura
 import com.example.totaldiaria.navigation.BottomNavigator
 import com.example.totaldiaria.preferences.QrManager
 import com.example.totaldiaria.service.CierreDiarioService
+import com.example.totaldiaria.service.DiaService
 import com.example.totaldiaria.ui.ComprobanteController
 import com.example.totaldiaria.ui.FormatoMoneda
 import com.example.totaldiaria.ui.MonedaTextWatcher
@@ -29,6 +30,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var cierreDiarioService: CierreDiarioService
     private lateinit var qrManager: QrManager
     private lateinit var comprobantes: ComprobanteController
+
+    private val diaService = DiaService()
 
     private lateinit var txtTotal: TextView
     private lateinit var txtCantidad: TextView
@@ -55,8 +58,7 @@ class MainActivity : AppCompatActivity() {
         cierreDiarioService = CierreDiarioService(this)
         qrManager = QrManager(this)
 
-        cierreDiarioService.archivarFacturasDeDiasAnteriores()
-        cierreDiarioService.aplicarCicloRegistros()
+        aplicarCierreDiario()
 
         restaurarEstado(savedInstanceState)
 
@@ -74,6 +76,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+
+        // Cubre el caso en que la app vuelve tras medianoche: el
+        // cierre es idempotente, así que solo archiva si quedan
+        // facturas de días anteriores.
+        aplicarCierreDiario()
 
         BottomNavigator.sincronizarPestana(this, R.id.nav_inicio)
         actualizarDashboard()
@@ -308,10 +315,25 @@ class MainActivity : AppCompatActivity() {
             Locale.getDefault()
         ).format(Date())
 
+    /**
+     * Cierre consolidado del día: idempotente, segura de ejecutar en
+     * cada entrada a la pantalla principal.
+     */
+    private fun aplicarCierreDiario() {
+
+        cierreDiarioService.archivarFacturasDeDiasAnteriores()
+        cierreDiarioService.aplicarCicloRegistros()
+    }
+
     private fun actualizarDashboard() {
 
+        // El contador se deriva exclusivamente de las facturas del
+        // día actual, no de un acumulado histórico ni de un estado
+        // caché.
         val lista =
-            facturaRepository.obtenerFacturas()
+            facturaRepository.obtenerFacturasDelDia(
+                diaService.hoy()
+            )
 
         val total =
             lista.sumOf { it.efectivo + it.transferencia }

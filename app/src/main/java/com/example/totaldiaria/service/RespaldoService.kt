@@ -854,7 +854,7 @@ class RespaldoService(private val context: Context) {
         private const val CARPETA_COMPROBANTES = "comprobantes"
         private const val CARPETA_TEMPORAL = "respaldo_import"
 
-        private const val NOMBRE_APP = "TotalDiaria"
+        private const val NOMBRE_APP = "DiariX"
 
         private const val FORMATO_FECHA_HORA = "dd/MM/yyyy HH:mm"
 
@@ -865,7 +865,7 @@ class RespaldoService(private val context: Context) {
             Regex("^comprobantes/[0-9]+\\.(jpg|jpeg|png|webp)$")
 
         const val MENSAJE_ARCHIVO_INVALIDO =
-            "El archivo seleccionado no es un respaldo válido de TotalDiaria"
+            "El archivo seleccionado no es un respaldo válido de DiariX"
 
         const val MENSAJE_VERSION_INCOMPATIBLE =
             "La versión del respaldo no es compatible con esta versión de la aplicación"

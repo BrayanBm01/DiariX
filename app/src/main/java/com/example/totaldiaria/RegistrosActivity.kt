@@ -19,6 +19,7 @@ import com.example.totaldiaria.models.PapeleraItem
 import com.example.totaldiaria.navigation.BottomNavigator
 import com.google.android.material.tabs.TabLayout
 import java.util.Calendar
+import java.util.Locale
 
 class RegistrosActivity : AppCompatActivity() {
 
@@ -206,6 +207,7 @@ class RegistrosActivity : AppCompatActivity() {
             { _, anio, mes, dia ->
 
                 val fecha = String.format(
+                    Locale.US,
                     "%02d/%02d/%04d",
                     dia,
                     mes + 1,

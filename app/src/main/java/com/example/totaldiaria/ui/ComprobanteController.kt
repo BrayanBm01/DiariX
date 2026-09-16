@@ -215,7 +215,7 @@ class ComprobanteController(
 
             put(
                 MediaStore.Images.Media.RELATIVE_PATH,
-                "Pictures/TotalDiaria"
+                "Pictures/DiariX"
             )
         }
 

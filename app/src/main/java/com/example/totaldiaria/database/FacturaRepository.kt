@@ -45,6 +45,26 @@ class FacturaRepository(context: Context) {
             """.trimIndent()
         )
 
+    /**
+     * Facturas activas de un día concreto. El día se pasa como
+     * 'dd/MM/yyyy' y se compara contra los 10 primeros caracteres de
+     * la columna fecha, de modo que el contador del inicio se deriva
+     * directamente de los datos de ese día.
+     */
+    fun obtenerFacturasDelDia(
+        dia: String
+    ): MutableList<Factura> =
+
+        consultar(
+            """
+            SELECT *
+            FROM facturas
+            WHERE substr(fecha,1,10) = ? AND estado='ACTIVA'
+            ORDER BY id DESC
+            """.trimIndent(),
+            arrayOf(dia)
+        )
+
     fun obtenerFacturasPorFecha(
         fecha: String
     ): MutableList<Factura> =

@@ -123,7 +123,7 @@ class ConfiguracionActivity : AppCompatActivity() {
         try {
 
             elegirDestinoExportacion.launch(
-                "TotalDiaria_respaldo_$fecha.zip"
+                "DiariX_respaldo_$fecha.zip"
             )
 
         } catch (e: Exception) {

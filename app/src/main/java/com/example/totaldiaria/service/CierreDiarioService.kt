@@ -4,9 +4,6 @@ import android.content.Context
 import com.example.totaldiaria.database.DatabaseHelper
 import com.example.totaldiaria.database.FacturaRepository
 import com.example.totaldiaria.database.RegistroRepository
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 /**
  * Consolida el cierre del día:
@@ -14,58 +11,51 @@ import java.util.Locale
  *     y se marcan como ARCHIVADA.
  *  2. Los registros que exceden el límite de días se mueven a la papelera.
  */
-class CierreDiarioService(private val context: Context) {
+class CierreDiarioService(
+    private val context: Context,
+    private val diaService: DiaService = DiaService()
+) {
 
     private val facturaRepository = FacturaRepository(context)
     private val registroRepository = RegistroRepository(context)
 
     fun archivarFacturasDeDiasAnteriores() {
 
-        val hoy = SimpleDateFormat(
-            FORMATO_FECHA,
-            Locale.getDefault()
-        ).format(Date())
+        val hoy = diaService.hoy()
 
         val facturas = facturaRepository.obtenerFacturas()
 
         if (facturas.isEmpty()) return
 
         val antiguas = facturas.filter {
-            it.fecha.take(10) != hoy
+            !diaService.esDelDia(it.fecha, hoy)
         }
 
         if (antiguas.isEmpty()) return
 
-        val cantidad = antiguas.size
-
-        val efectivo = antiguas.sumOf {
-            it.efectivo
+        // Se agrupa por día real: cada día anterior genera su propio
+        // registro, aunque la app lleve varios días sin abrirse.
+        val porDia = antiguas.groupBy {
+            it.fecha.take(DiaService.FORMATO_FECHA.length)
         }
 
-        val transferencia = antiguas.sumOf {
-            it.transferencia
+        for ((fechaRegistro, facturasDelDia) in porDia) {
+
+            val efectivo = facturasDelDia.sumOf { it.efectivo }
+
+            val transferencia =
+                facturasDelDia.sumOf { it.transferencia }
+
+            registroRepository.guardarEnRegistros(
+                fechaRegistro,
+                facturasDelDia.size,
+                efectivo,
+                transferencia,
+                efectivo + transferencia,
+                facturasDelDia.count { it.efectivo > 0 },
+                facturasDelDia.count { it.transferencia > 0 }
+            )
         }
-
-        val total = efectivo + transferencia
-
-        val cantidadEfectivo =
-            antiguas.count { it.efectivo > 0 }
-
-        val cantidadTransferencia =
-            antiguas.count { it.transferencia > 0 }
-
-        val fechaRegistro =
-            antiguas.first().fecha.take(10)
-
-        registroRepository.guardarEnRegistros(
-            fechaRegistro,
-            cantidad,
-            efectivo,
-            transferencia,
-            total,
-            cantidadEfectivo,
-            cantidadTransferencia
-        )
 
         facturaRepository.marcarComoArchivadasAnterioresA(hoy)
     }
@@ -136,8 +126,6 @@ class CierreDiarioService(private val context: Context) {
     }
 
     companion object {
-
-        private const val FORMATO_FECHA = "dd/MM/yyyy"
 
         const val LIMITE_REGISTROS = 30
     }
