@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Fase 4: la app sincroniza facturas con el backend de DiariX. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -8,12 +12,28 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.TotalDiaria">
+        android:theme="@style/Theme.TotalDiaria"
+        android:usesCleartextTraffic="false">
+
+        <!--
+          ENTRADA
+
+          Sigue siendo MainActivity el LAUNCHER: no se toca el punto de entrada
+          de la app, que es lo que garantiza que DiariX se siga abriendo como
+          siempre. Solo cambia que, si el área vigente es la de préstamos, esa
+          pantalla devuelve el arranque al inicio de esa área (ver
+          `MainActivity.onCreate` y `SelectorDeModo.abrirInicio`).
+        -->
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
 
         <activity
-            android:name=".MainActivity"
+            android:name=".modulos.facturacion.ui.MainActivity"
             android:exported="true">
 
             <intent-filter>
@@ -35,24 +55,159 @@
 
         </provider>
 
+        <!--
+          ÁREA DE FACTURACIÓN (la de siempre, sin cambios de comportamiento)
+        -->
         <activity
-            android:name=".FacturasDelDiaActivity"
+            android:name=".modulos.facturacion.ui.FacturasDelDiaActivity"
             android:exported="false"/>
 
         <activity
-            android:name=".HistorialActivity"
+            android:name=".modulos.facturacion.ui.HistorialActivity"
             android:exported="false"/>
 
         <activity
-            android:name=".RegistrosActivity"
+            android:name=".modulos.facturacion.ui.RegistrosActivity"
             android:exported="false"/>
 
         <activity
-            android:name=".EstadisticasActivity"
+            android:name=".modulos.facturacion.ui.EstadisticasActivity"
             android:exported="false"/>
 
         <activity
-            android:name=".ConfiguracionActivity"
+            android:name=".modulos.facturacion.ui.ConfiguracionActivity"
+            android:exported="false"/>
+
+        <!--
+          FASE 2 · CLIENTES
+
+          `ClientesActivity` es la pestaña "Clientes" del área de PRESTAMOS
+          (la quinta del menú azul, `nav_prestamos_clientes`) y
+          `ClienteFormularioActivity` es el formulario de alta, edición y
+          borrado que se abre desde la lista. La segunda declara
+          `adjustResize` para que el teclado empuje el formulario: sin eso,
+          los campos de abajo quedan debajo del teclado y el "no encuentro
+          Guardar" (que este proyecto ya vivió en Editar perfil) vuelve a
+          aparecer.
+
+          El padrón no pertenece a Facturación: la pestaña "Clientes" del
+          menú de facturación se retiró en el cambio rápido y la pantalla se
+          movió (sin pasarse de paquete) a la barra de Préstamos.
+        -->
+        <activity
+            android:name=".modulos.facturacion.ui.ClientesActivity"
+            android:exported="false"/>
+
+        <activity
+            android:name=".modulos.facturacion.ui.ClienteFormularioActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
+
+        <!--
+          LA PANTALLA DE SELECCIÓN DE ÁREA
+
+          Vive fuera de los dos módulos a propósito: es la UNICA pantalla que
+          necesita un usuario que todavía no está en ninguno de los dos, así que
+          no pertenece a ninguno. Se abre con `CLEAR_TASK`, de modo que no deja
+          debajo la pantalla desde la que se partsio.
+
+          Es `exported="false"`: no es un destino al que se pueda ir desde fuera
+          de DiariX. Nadie, ni otra aplicación, debería poder poner a alguien
+          delante de "¿Qué quieres gestionar?".
+        -->
+        <activity
+            android:name=".core.modo.SeleccionDeModoActivity"
+            android:exported="false"/>
+
+        <!--
+          CUENTA (Fase 0.1)
+
+          Estas tres pantallas son de las dos áreas, no de una. Editar perfil,
+          Ayuda y Acerca de son las mismas dentro de Facturación y dentro de
+          Préstamos: si dependieran del área, habría que mantener dos copias que
+          se desincronizan en cuanto se corrige un texto en una de ellas.
+        -->
+        <activity
+            android:name=".core.cuenta.EditarPerfilActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
+
+        <activity
+            android:name=".core.cuenta.AyudaActivity"
+            android:exported="false"/>
+
+        <activity
+            android:name=".core.cuenta.AcercaDeActivity"
+            android:exported="false"/>
+
+        <!--
+          ÁREA DE PRÉSTAMOS
+
+          Fase 0: solo su pantalla de inicio.
+          Fase 1: las secciones del menú —Préstamos, Cobros y Pagos— con su
+          pantalla vacía a propósito, más la pestaña "Clientes" que muestra el
+          padrón real (`ClientesActivity`, Fase 2).
+
+          Se declaran aquí y no por código porque una Activity sin declarar en
+          el manifiesto es una pestaña que crashea al tocarla, y ese fallo
+          aparece en un dispositivo y no en el build. `ModoDiarixTest` las
+          recorre todas por el `PackageManager` y falla en el build si falta
+          una, que es donde tiene que fallar.
+
+          No se exportan: ninguna de ellas es un punto de entrada desde fuera,
+          y abrir una sección de Préstamos sin sesión sería un agujero.
+        -->
+        <activity
+            android:name=".modulos.prestamos.ui.PrestamosInicioActivity"
+            android:exported="false"/>
+
+        <activity
+            android:name=".modulos.prestamos.ui.PrestamosPrestamosActivity"
+            android:exported="false"/>
+
+        <!--
+          FASE 3 · PRÉSTAMOS
+
+          `PrestamosPrestamosActivity` dejó de ser la pestaña vacía de la
+          Fase 1 y se volvió el listado del módulo. `PrestamoFormularioActivity`
+          es el alta (con su selector de cliente y su DatePicker de inicio;
+          `adjustResize` para que el teclado no tape Registrar), y
+          `PrestamoDetalleActivity` la ficha con el calendario de cuotas.
+          Las tres son pantallas internas del área, no exportadas.
+        -->
+        <activity
+            android:name=".modulos.prestamos.ui.PrestamoFormularioActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
+
+        <activity
+            android:name=".modulos.prestamos.ui.PrestamoDetalleActivity"
+            android:exported="false"/>
+
+        <!--
+          FASE 4 · PAGOS
+
+          `PrestamoPagoActivity` es el formulario con que se registra un pago
+          (RF-10/RF-11): arma el pago y se lo manda al servidor, que reparte el
+          monto entre las cuotas en la misma transacción. `adjustResize` para
+          que el teclado no tape el botón. Reversión, cobros, historial y
+          resumen viven en pantallas ya declaradas: Cobros, Pagos e Inicio.
+        -->
+        <activity
+            android:name=".modulos.prestamos.ui.PrestamoPagoActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
+
+        <activity
+            android:name=".modulos.prestamos.ui.SelectorDeClienteActivity"
+            android:exported="false"/>
+
+        <activity
+            android:name=".modulos.prestamos.ui.PrestamosCobrosActivity"
+            android:exported="false"/>
+
+        <activity
+            android:name=".modulos.prestamos.ui.PrestamosPagosActivity"
             android:exported="false"/>
 
     </application>

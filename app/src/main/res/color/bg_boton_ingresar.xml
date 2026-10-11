@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+    Fondo del botón principal del Login.
+
+    Reutiliza el verde de DiariX (`verde_pago`, el mismo del logo y del resto
+    de la app). El estado deshabilitado usa un verde apagado para que se vea
+    claramente que el botón no está disponible mientras la app trabaja, sin
+    cambiar su color de identidad.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:alpha="0.85"
+        android:color="@color/verde_pago"
+        android:state_pressed="true"/>
+
+    <item
+        android:color="@color/verde_pago"
+        android:state_enabled="true"/>
+
+    <item android:color="@color/verde_pago_apagado"/>
+
+</selector>

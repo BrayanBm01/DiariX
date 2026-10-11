@@ -1,0 +1,17 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+  <!--
+    DIARIX · Fase 2 · Icono de "nuevo registro" (Material "add").
+
+    Mismo trazo y misma cuadrícula de 960 que el resto de iconos de la app.
+    El `fillColor` es el gris neutro de siempre: aquí se fija el color en el
+    sitio donde se usa (blanco sobre el botón verde de Facturación), porque
+    un color metido en el vector no se puede reutilizar en otro fondo.
+  -->
+  <path
+      android:pathData="M440,-440L200,-440L200,-520L440,-520L440,-760L520,-760L520,-520L760,-520L760,-440L520,-440L520,-200L440,-200L440,-440Z"
+      android:fillColor="#e3e3e3"/>
+</vector>

@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DIARIX · Fase 2 · Alta y edición de un cliente (RF-01).
+
+  UN SOLO formulario para crear y para editar, con el título cambiando en
+  código. Dos layouts casi idénticos es la forma clásica de que un campo se
+  corrija en uno y no en el otro.
+
+  Los ocho campos de texto van dentro de `TextInputLayout`, que es lo que
+  hace que la etiqueta se encoja y suba cuando el usuario escribe. En un
+  formulario de nueve campos, la alternativa (`hint` suelto) deja la pantalla
+  sin saber qué es cada casilla en cuanto la primera línea se rellena, y el
+  error "¿esto era correo o dirección?" se paga rellenando dos veces.
+
+  El tipo de documento va en un `Spinner` y no en un campo de texto: es un
+  catálogo CERRADO que también lo declara el backend (`CC, CE, NIT, TI,
+  PASAPORTE, RUT`), y dejar tecleárselo a alguien convertiría cada error de
+  tipeo en un 400 que el usuario no sabe resolver.
+
+  El borrado va AQUÍ y no en el listado. Antes de confirmar se ve el nombre
+  completo y el documento en la misma pantalla donde se está editando, que es
+  donde hace falta la certeza de estar tocando a la persona correcta.
+
+  El botón Guardar va al final de la tarjeta, no flotando: con el teclado
+  abierto un botón flotante queda debajo del teclado y el "no encuentro
+  Guardar" ya le pasó a esta app en Editar perfil.
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F0F3FA"
+    android:orientation="vertical">
+
+    <!-- ENCABEZADO -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:elevation="4dp"
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingTop="40dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="16dp">
+
+        <TextView
+            android:id="@+id/txtTituloFormulario"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nuevo cliente"
+            android:textColor="#1C2340"
+            android:textSize="26sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/txtSubtituloFormulario"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Los datos con * son obligatorios."
+            android:textColor="#7A7A9D"
+            android:textSize="13sp"/>
+
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <!-- ERROR DEL SERVIDOR -->
+
+                    <TextView
+                        android:id="@+id/txtErrorFormulario"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="6dp"
+                        android:background="#FDECEC"
+                        android:padding="12dp"
+                        android:textColor="#C62828"
+                        android:textSize="14sp"
+                        android:visibility="gone"/>
+
+                    <!-- NOMBRES -->
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/campoNombres"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Nombres *">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/edtNombres"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPersonName|textCapWords"
+                            android:maxLength="160"
+                            android:maxLines="1"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- APELLIDOS -->
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/campoApellidos"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:hint="Apellidos *">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/edtApellidos"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPersonName|textCapWords"
+                            android:maxLength="160"
+                            android:maxLines="1"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- TIPO DE DOCUMENTO -->
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginTop="16dp"
+                        android:text="Tipo de documento *"
+                        android:textColor="#7A7A9D"
+                        android:textSize="12sp"/>
+
+                    <Spinner
+                        android:id="@+id/spinnerTipoDocumento"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:layout_marginTop="2dp"
+                        android:background="@drawable/edittext_borde"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"/>
+
+                    <!-- NÚMERO DE DOCUMENTO -->
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/campoNumeroDocumento"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:hint="Número de documento *">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/edtNumeroDocumento"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textNoSuggestions"
+                            android:maxLength="32"
+                            android:maxLines="1"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- CORREO -->
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/campoEmail"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:hint="Correo electrónico">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/edtEmail"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textEmailAddress"
+                            android:maxLength="320"
+                            android:maxLines="1"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- TELÉFONO -->
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/campoTelefono"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:hint="Teléfono">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/edtTelefono"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="phone"
+                            android:maxLength="32"
+                            android:maxLines="1"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- DIRECCIÓN -->
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/campoDireccion"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:hint="Dirección">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/edtDireccion"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPostalAddress"
+                            android:maxLength="255"
+                            android:maxLines="2"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- REFERENCIAS: a quién pedir, no DÓNDE vive -->
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/campoReferencias"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:hint="Referencias">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/edtReferencias"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textCapSentences"
+                            android:maxLength="400"
+                            android:maxLines="2"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginTop="4dp"
+                        android:text="A quién pedir por el cliente. Opcional."
+                        android:textColor="#7A8194"
+                        android:textSize="12sp"/>
+
+                    <!-- OBSERVACIONES -->
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/campoObservaciones"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:hint="Observaciones">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/edtObservaciones"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="top"
+                            android:inputType="textMultiLine|textCapSentences"
+                            android:maxLength="1000"
+                            android:minLines="3"/>
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- GUARDAR -->
+
+            <Button
+                android:id="@+id/btnGuardarCliente"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:backgroundTint="#0AA87A"
+                android:text="Guardar cliente"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold"/>
+
+            <!-- ELIMINAR (solo en edición) -->
+
+            <Button
+                android:id="@+id/btnEliminarCliente"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="#FDECEC"
+                android:text="Eliminar cliente"
+                android:textAllCaps="false"
+                android:textColor="#C62828"
+                android:textSize="15sp"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DIARIX · Fase 4 · PAGOS del área de Préstamos (historial general).
+
+  La pestaña que en Fase 1 era una pantalla vacía muestra el historial REAL de
+  `GET /prestamos/pagos`: búsqueda por cliente, filtro por método y paginación,
+  todo resuelto por el servidor. El estado de pantalla, como en el resto: en
+  cargando, vacío, error con reintentar y lista.
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F0F3FA"
+    android:orientation="vertical">
+
+    <!-- ENCABEZADO -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:elevation="4dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingTop="36dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="14dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pagos"
+                android:textColor="#1C2340"
+                android:textSize="26sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/txtResumenPagos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#7A7A9D"
+                android:textSize="13sp"/>
+
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/btnAbrirConfiguracion"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/configuracion_titulo"
+            android:padding="10dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_settings"
+            app:tint="#5A6182" />
+
+    </LinearLayout>
+
+    <!-- BÚSQUEDA Y FILTRO -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:elevation="2dp"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="12dp">
+
+        <EditText
+            android:id="@+id/edtBuscarPago"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/edittext_borde"
+            android:hint="Buscar pago por cliente"
+            android:inputType="text"
+            android:maxLength="120"
+            android:padding="13dp"
+            android:textColor="#000000"
+            android:textColorHint="#7A7A9D"
+            android:textSize="14sp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/txtFiltroTodosPagos"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_chip_filtro_activo"
+                android:gravity="center"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
+                android:text="Todos"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/txtFiltroEfectivo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_chip_filtro"
+                android:gravity="center"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
+                android:text="Efectivo"
+                android:textColor="#4A5578"
+                android:textSize="12sp"/>
+
+            <TextView
+                android:id="@+id/txtFiltroTransferencia"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/bg_chip_filtro"
+                android:gravity="center"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
+                android:text="Transferencia"
+                android:textColor="#4A5578"
+                android:textSize="12sp"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- CONTENIDO: un solo hijo visible cada vez -->
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- 1 · CARGANDO -->
+
+        <ProgressBar
+            android:id="@+id/progresoPagos"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_gravity="center"
+            android:indeterminateTint="#2B6ED4"
+            android:visibility="gone"/>
+
+        <!-- 2 · VACÍO -->
+
+        <LinearLayout
+            android:id="@+id/estadoVacioPagos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_pagos"
+                app:tint="#C9D5E8"/>
+
+            <TextView
+                android:id="@+id/txtVacioTituloPagos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:gravity="center"
+                android:textColor="#1C2340"
+                android:textSize="17sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/txtVacioMensajePagos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center"
+                android:textColor="#7A7A9D"
+                android:textSize="14sp"/>
+
+        </LinearLayout>
+
+        <!-- 3 · ERROR -->
+
+        <LinearLayout
+            android:id="@+id/estadoErrorPagos"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="No se pudieron cargar los pagos"
+                android:textColor="#1C2340"
+                android:textSize="17sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/txtErrorPagos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center"
+                android:textColor="#7A7A9D"
+                android:textSize="14sp"/>
+
+            <Button
+                android:id="@+id/btnReintentarPagos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:backgroundTint="#2B6ED4"
+                android:paddingStart="26dp"
+                android:paddingEnd="26dp"
+                android:text="Reintentar"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"/>
+
+        </LinearLayout>
+
+        <!-- 4 · LISTA -->
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/listaPagos"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingStart="16dp"
+            android:paddingTop="14dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="14dp"
+            android:visibility="gone"/>
+
+    </FrameLayout>
+
+    <!-- PAGINACIÓN (solo cuando hay más de una página) -->
+
+    <LinearLayout
+        android:id="@+id/barraPaginacionPagos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="4dp"
+        android:visibility="gone">
+
+        <ImageButton
+            android:id="@+id/btnPaginaAnteriorPagos"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Página anterior"
+            android:padding="8dp"
+            android:rotation="180"
+            android:src="@drawable/ic_chevron"
+            app:tint="#2B6ED4"/>
+
+        <TextView
+            android:id="@+id/txtPaginaPagos"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textColor="#7A7A9D"
+            android:textSize="13sp"/>
+
+        <ImageButton
+            android:id="@+id/btnPaginaSiguientePagos"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Página siguiente"
+            android:padding="8dp"
+            android:src="@drawable/ic_chevron"
+            app:tint="#2B6ED4"/>
+
+    </LinearLayout>
+
+    <!-- NAVEGACIÓN INFERIOR (el azul del área de PRÉSTAMOS) -->
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        style="@style/MenuInferiorCompactoPrestamos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>

@@ -1,0 +1,22 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+  <!--
+    DIARIX · Fase 1 · Icono de la pestaña CLIENTES.
+
+    Es un grupo de personas (Material "groups"), no un icono de ficha de
+    persona: una persona sola sería "Conductor" o "Usuario", y de lo que trata
+    esta pestaña es del padrón de clientes de un prestamista.
+
+    Mismo trazo y mismo `fillColor` que el resto de iconos de la app: el
+    `#e3e3e3` es un relleno neutro que se sustituye por el `itemIconTint` del
+    menú (gris sin seleccionar, azul de Préstamos al seleccionar). Poner aquí
+    el color del área rompería el tinte del menú y dejaría la pestaña azul
+    también cuando no está elegida.
+  -->
+  <path
+      android:pathData="M0,960v-80h960v80L0,960ZM160,800v-232q0,-34 17.5,-62.5T221,459q28,-13 59,-13t59,13q34,16 51.5,44.5T408,568v232L160,800ZM160,800h320v-80L160,720v80ZM480,760v-200q0,-34 17.5,-62.5T541,451q28,-13 59,-13t59,13q34,16 51.5,44.5T728,560v200L480,760ZM480,760h400v-80L480,680v80ZM720,640v-160q0,-34 -17.5,-62.5T661,371q-28,-13 -59,-13t-59,13q-34,16 -51.5,44.5T474,480v160L720,640ZM720,640h240v-80L720,560v80ZM320,344q-57,0 -98.5,-41.5T180,204q0,-57 41.5,-98.5T320,64q57,0 98.5,41.5T460,204q0,57 -41.5,98.5T320,344ZM320,344ZM640,296q-57,0 -98.5,-41.5T500,156q0,-57 41.5,-98.5T640,16q57,0 98.5,41.5T780,156q0,57 -41.5,98.5T640,296ZM640,296Z"
+      android:fillColor="#e3e3e3"/>
+</vector>

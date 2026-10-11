@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  PRÉSTAMOS = el azul que la app ya usa para transferencia (#2B6ED4).
+  No es un color inventado: es el segundo color de la paleta actual, para que
+  el área nueva se distinga sin sacar nada de la identidad visual de DiariX.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <solid android:color="#2B6ED4"/>
+
+    <corners android:radius="3dp"/>
+
+</shape>

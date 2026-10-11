@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Filtro de listado (Préstamos, Fase 3): chip elegido, azul del área. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <corners android:radius="20dp"/>
+
+    <solid android:color="#2B6ED4"/>
+
+</shape>

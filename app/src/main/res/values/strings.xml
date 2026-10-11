@@ -1,3 +1,234 @@
 <resources>
     <string name="app_name">DiariX</string>
+
+    <!--
+      DIARIX · Fase 0 · Las dos áreas de trabajo.
+
+      Son los únicos textos nuevos y viven aquí (no en el layout) porque
+      `ModoDiarix` los necesita como recursos: el título del área se pinta en
+      la tira, en el selector y en el menú según el modo vigente, y tenerlos
+      escritos tres veces es la forma segura de que dejen de coincidir.
+    -->
+    <string name="modo_facturacion">FACTURACIÓN</string>
+    <string name="modo_facturacion_resumen">Registra las facturas del día y revisa historial, registros y estadísticas.</string>
+
+    <string name="modo_prestamos">PRÉSTAMOS</string>
+    <string name="modo_prestamos_resumen">Administra clientes, préstamos, cuotas y cobros.</string>
+
+    <string name="modo_vigente">AQUÍ</string>
+    <string name="selector_modo_titulo">¿Qué quieres gestionar?</string>
+    <string name="cancelar">Cancelar</string>
+
+    <!--
+      DIARIX · Fase 0.1 · La pantalla de selección de área.
+
+      Se muestran solo la primera vez, justo después de entrar. La instrucción
+      explica que es una decisión que se puede cambiar después: sin esa frase,
+      quien elige lo entiende como algo definitivo y no se atreve a hacerlo.
+    -->
+    <string name="selector_modo_instruccion">Elige el área de trabajo de DiariX. Puedes cambiarla cuando quieras desde Configuración.</string>
+    <string name="selector_modo_elige_primero">Elige un área para continuar.</string>
+    <string name="selector_modo_aviso_prestamos">El área de Préstamos administra clientes, préstamos, cuotas y cobros.</string>
+
+    <!--
+      DIARIX · Fase 1 · Títulos de las cinco pestañas de PRÉSTAMOS.
+
+      Van en `strings.xml` y no en el XML del menú, a diferencia de los títulos
+      de las pestañas de facturación, y la razón es práctica: un `android:title`
+      literal en un menú se puede comprobar comparando la cadena en un test, y
+      además se traduce con el resto. Las cinco son palabras de una o dos sílabas
+      porque con `labelVisibilityMode="selected"` caben de una en pantalla a
+      22sp de icono: "Préstamos" entra, "Historial de préstamos" no habría
+      entrado y habría tenido que recortarse a "Pres…", que es peor que
+      llamarlo corto.
+    -->
+    <string name="pestana_inicio">Inicio</string>
+    <string name="pestana_clientes">Clientes</string>
+    <string name="pestana_prestamos">Préstamos</string>
+    <string name="pestana_cobros">Cobros</string>
+    <string name="pestana_pagos">Pagos</string>
+
+    <!--
+      Estado vacío de las pantallas base del área.
+
+      UNA cadena por sección, y no una genérica, porque estas pantallas son lo
+      primero que ve alguien que abre Préstamos esperando su herramienta de
+      trabajo. Un "Sin datos" sobre un padrón de clientes que todavía no tiene
+      clientes suena a fallo; "Todavía no hay clientes registrados" suena a lo
+      que es: una sección que empieza a construirse.
+
+      Se dice ademas que falta, que es la pregunta que alguien se hace al ver la
+      pantalla vacia.
+    -->
+    <!--
+      Subtítulo común de las cuatro secciones. Dice "área de Préstamos" y no
+      "préstamos" a propósito: dentro del área de Préstamos, un subtítulo que
+      dijera simplemente "Préstamos" sería ambiguo con la pestaña Préstamos, que
+      está a un toque de ahí. Es una línea de nueve palabras y su único trabajo
+      es que nadie tenga que adivinar en qué área está.
+    -->
+    <string name="prestamos_area_activa">Área de Préstamos</string>
+
+    <!--
+      Fase 4 · Pantalla de inicio del área.
+
+      La lista de "PRÓXIMAMENTE" desapareció: las tres secciones del menú
+      (Préstamos, Cobros y Pagos) ya abren pantallas reales. El inicio pinta
+      ahora el resumen que calcula el servidor (`GET /prestamos/resumen`), por
+      eso no hay cables que traducir aquí: el resto de los textos de la
+      pantalla son frases completas escritas en el layout o puestas por el
+      código al pintar los números.
+    -->
+
+    <!--
+      DIARIX · Fase 0.1 · Configuración.
+
+      Estas SÍ están en `strings.xml` aunque el resto de la app escriba sus
+      textos en el layout, y hay una razón: la pantalla de Configuración es la
+      que se va a traducir y la que se lee completa de un vistazo. Tenerla
+      dispersa entre el XML y el código hace que cualquier traducción se
+      quede a medias y que la pantalla deje de estar en un solo sitio.
+
+      Lo que NO está aquí, y por qué, está anotado en
+      `docs/FASE-0-SEPARACION-DE-MODOS.md`:
+        · Notificaciones  → DiariX no tiene notificaciones: no hay sección.
+        · Apariencia      → no hay sistema de tema: no hay sección.
+      Poner un interruptor que no hace nada es peor que no ponerlo.
+    -->
+
+    <!-- Cabecera -->
+    <string name="configuracion_titulo">Configuración</string>
+    <string name="configuracion_subtitulo">Tu cuenta, tu perfil y el área de trabajo de DiariX.</string>
+
+    <!-- Títulos de sección -->
+    <string name="configuracion_seccion_perfil">Perfil</string>
+    <string name="configuracion_seccion_cuenta">Cuenta</string>
+    <string name="configuracion_seccion_comprobantes">Comprobantes</string>
+    <string name="configuracion_seccion_respaldo">Tus datos</string>
+    <string name="configuracion_seccion_informacion">Información</string>
+
+    <!-- Perfil -->
+    <string name="perfil_sin_nombre">Sin nombre</string>
+    <string name="perfil_editar">Ver y editar perfil</string>
+    <string name="perfil_cuenta_google">Cuenta de Google</string>
+    <string name="perfil_correo_identidad">El correo identifica tu cuenta y por eso no se puede cambiar aquí.</string>
+    <string name="perfil_sin_telefono">Sin teléfono</string>
+
+    <!-- Edición del perfil -->
+    <string name="perfil_editar_titulo">Editar perfil</string>
+    <string name="perfil_editar_subtitulo">Puedes cambiar estos datos cuando quieras.</string>
+    <string name="perfil_campo_correo">Correo de la cuenta</string>
+    <string name="perfil_campo_nombre">Nombre completo</string>
+    <string name="perfil_campo_telefono">Teléfono</string>
+    <string name="perfil_seccion_editable">Datos que sí puedes cambiar</string>
+    <string name="perfil_correo_solo_lectura">El correo no se puede cambiar desde la aplicación: es lo que identifica tu cuenta y, si entraste con Google, es el que Google firmó.</string>
+    <string name="perfil_telefono_ayuda">Opcional. Se escribe como quieras: la aplicación no lo usa para llamar ni para enviarte mensajes.</string>
+    <string name="perfil_guardar">Guardar</string>
+    <string name="perfil_guardado">Tus datos se actualizaron.</string>
+    <string name="perfil_nombre_vacio">Escribe tu nombre.</string>
+    <string name="perfil_nombre_muy_largo">El nombre admite máximo 160 caracteres.</string>
+    <string name="perfil_telefono_muy_largo">El teléfono admite máximo 32 caracteres.</string>
+    <string name="perfil_no_se_puede_guardar">No se pudieron guardar tus datos. Revisa tu conexión.</string>
+    <string name="perfil_inicial_vacio">?</string>
+
+    <!-- Cuenta -->
+    <string name="configuracion_modo">Modo de DiariX</string>
+    <string name="configuracion_modo_ayuda">Puedes cambiar el área de trabajo de DiariX en cualquier momento.</string>
+    <string name="configuracion_modo_cambiar">Cambiar</string>
+    <string name="configuracion_sesion">Sesión</string>
+    <string name="configuracion_sesion_activa">Activa en este dispositivo</string>
+    <string name="configuracion_sesion_sin_datos">Sin datos de la sesión</string>
+    <!--
+      El rol NO se pone en minúsculas a secas. Los valores del backend son
+      ADMIN / ACCOUNTANT / DRIVER / USER (enum `UserRole`) y son el nombre de un
+      tipo de persona, no un estado de cuenta: en minúsculas se leerían como
+      "admin", que parece un estado o un permiso. Las cuatro formas están
+      escritas a mano, una a una, y no generadas: son cuatro y no van a cambiar.
+    -->
+    <string name="configuracion_rol_admin">administrador de DiariX</string>
+    <string name="configuracion_rol_accountant">contador</string>
+    <string name="configuracion_rol_driver">conductor</string>
+    <string name="configuracion_rol_user">usuario</string>
+
+    <string name="configuracion_sesion_con_rol">Activa en este dispositivo · %1$s</string>
+    <string name="configuracion_cerrar_todos">Cerrar sesión en todos los dispositivos</string>
+    <string name="configuracion_cerrar_todos_ayuda">Revoca el acceso también en los demás teléfonos donde entraste.</string>
+    <string name="configuracion_cerrar_todos_confirmacion">¿Cerrar sesión en todos los dispositivos?</string>
+    <string name="configuracion_cerrar_todos_confirmacion_detalle">Se cerrará la sesión en los demás teléfonos. En este seguirás dentro.</string>
+    <string name="configuracion_cerrar_todos_lista">Se cerraron %1$d sesión(es) en otros dispositivos.</string>
+    <string name="configuracion_cerrar_todos_error">No se pudieron cerrar las otras sesiones. Revisa tu conexión.</string>
+
+    <!-- Comprobantes -->
+    <string name="configuracion_qr">Código QR de los comprobantes</string>
+    <string name="configuracion_qr_cambiar">Cambiar imagen del QR</string>
+    <string name="configuracion_qr_configurado">Imagen configurada. Toca para cambiarla.</string>
+    <string name="configuracion_qr_sin_configurar">Ninguna configurada. Toca para elegir una imagen.</string>
+
+    <!-- Tus datos -->
+    <string name="configuracion_exportar">Exportar respaldo</string>
+    <string name="configuracion_exportar_ayuda">Guarda facturas, cierres y comprobantes en un archivo.</string>
+    <string name="configuracion_importar">Importar respaldo</string>
+    <string name="configuracion_importar_ayuda">Restaura un respaldo hecho en este u otro dispositivo.</string>
+
+    <!-- Información -->
+    <string name="configuracion_ayuda">Ayuda</string>
+    <string name="configuracion_acerca_de">Acerca de DiariX</string>
+    <string name="configuracion_version">Versión</string>
+    <string name="configuracion_version_numero">%1$s (nº %2$d)</string>
+
+    <!--
+      Botón de confirmación. Es un `string` y no un texto en el código porque
+      "Confirmar" aparece en tres diálogos distintos y tiene que decir lo mismo.
+    -->
+    <string name="confirmar">Confirmar</string>
+
+    <!-- Ayuda -->
+    <string name="ayuda_titulo">Ayuda</string>
+    <string name="ayuda_subtitulo">Lo básico para moverte por DiariX.</string>
+
+    <string name="ayuda_seccion_areas">Las dos áreas</string>
+    <string name="ayuda_areas_texto">DiariX tiene dos áreas de trabajo separadas. Facturación es la que registra las facturas y los movimientos de pago del día. Préstamos es la que lleva el padrón de clientes y llevará los préstamos, las cuotas y los cobros. Cambiar de una a otra no borra nada de la otra.</string>
+    <string name="ayuda_areas_camino">Para cambiar de área: Configuración → Modo de DiariX → Cambiar.</string>
+
+    <string name="ayuda_seccion_pestanas">Las pestañas de Facturación</string>
+    <string name="ayuda_pestana_inicio">Inicio</string>
+    <string name="ayuda_pestana_inicio_detalle">El día de hoy: la factura en curso y su total.</string>
+    <string name="ayuda_pestana_registros">Registros</string>
+    <string name="ayuda_pestana_registros_detalle">El registro de las facturas y los movimientos de pago del día.</string>
+    <string name="ayuda_pestana_estadisticas">Estadísticas</string>
+    <string name="ayuda_pestana_estadisticas_detalle">Los números de tu jornada: montos, cantidades y promedios.</string>
+    <string name="ayuda_pestana_historial">Historial</string>
+    <string name="ayuda_pestana_historial_detalle">Las facturas del día y las anteriores, con su cierre del día.</string>
+    <string name="ayuda_pestana_configuracion">Configuración</string>
+    <string name="ayuda_pestana_configuracion_detalle">Perfil, área de DiariX, QR y demás ajustes de la app.</string>
+
+    <string name="ayuda_seccion_prestamos">El área de Préstamos</string>
+    <string name="ayuda_prestamos_estado">El área de Préstamos está separada y tiene su padrón de clientes en la pestaña Clientes. Los préstamos, las cuotas y los cobros se irán añadiendo poco a poco.</string>
+    <string name="ayuda_prestamos_en_construccion">Puedes entrar y salir de ella cuando quieras sin que afecte a tus facturas.</string>
+
+    <string name="ayuda_seccion_tus_datos">Tus datos</string>
+    <string name="ayuda_dato_qr">Comprobantes</string>
+    <string name="ayuda_dato_qr_detalle">El QR que sale impreso en tus facturas se elige en Configuración → Código QR de los comprobantes.</string>
+    <string name="ayuda_dato_respaldo">Respaldo</string>
+    <string name="ayuda_dato_respaldo_detalle">En Configuración → Tus datos puedes exportar un respaldo de tu información y volver a importarlo en otro teléfono.</string>
+    <string name="ayuda_dato_sesion">Sesión</string>
+    <string name="ayuda_dato_sesion_detalle">Puedes cerrar tu sesión, o cerrar las de los demás teléfonos, desde Configuración → Cuenta.</string>
+
+    <string name="ayuda_sin_soporte">Aquí solo hay ayuda de uso. DiariX todavía no tiene un canal de soporte: si algo no funciona, escribe a quien te pasó la aplicación indicando la versión que aparece en Acerca de DiariX.</string>
+
+    <!-- Acerca de -->
+    <string name="acerca_titulo">Acerca de DiariX</string>
+    <string name="acerca_app_nombre">DiariX</string>
+    <string name="acerca_version">Versión %1$s</string>
+    <string name="acerca_que_es">DiariX reúne en un solo lugar el registro de las facturas del día y la gestión de préstamos con sus cuotas y cobros. Son dos áreas de trabajo separadas: cada una con sus módulos, sin mezclarse.</string>
+    <string name="acerca_privacidad">Tus datos y los tokens de tu sesión se guardan cifrados en este dispositivo. La conexión con el servidor es siempre cifrada.</string>
+    <string name="acerca_prestamos_estado">El área de Préstamos está en construcción. Ya tiene el padrón de clientes; los préstamos, las cuotas y los cobros se irán añadiendo poco a poco, y la pantalla de inicio lo dice con claridad para que nadie busque algo que no existe.</string>
+
+    <!-- Cerrar sesión -->
+    <string name="configuracion_cerrar_sesion">Cerrar sesión</string>
+    <string name="configuracion_cerrar_sesion_ayuda">Tus facturas locales se conservan en este dispositivo.</string>
+    <string name="configuracion_cerrar_sesion_titulo">Cerrar sesión</string>
+    <string name="configuracion_cerrar_sesion_confirmacion">¿Quieres cerrar tu sesión?</string>
+    <string name="configuracion_cerrar_sesion_detalle">Deberás iniciar sesión nuevamente para acceder a DiariX. Tus facturas locales se conservan en este dispositivo.</string>
+    <string name="configuracion_cerrar_sesion_confirmar">Cerrar sesión</string>
 </resources>

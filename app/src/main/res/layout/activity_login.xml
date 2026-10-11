@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+    Pantalla de acceso a DiariX.
+
+    NOTA IMPORTANTE (Fase 4): este layout es SOLO presentación. Los ids
+    (edtNit, edtEmail, edtPassword, btnEntrar, btnGoogle, txtError, progreso)
+    son los mismos que usa LoginActivity.kt: la lógica de autenticación no se
+    toca. El campo "Usuario" sigue siendo el correo que espera el backend y
+    el campo NIT conserva su teclado numérico.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/fondo_app"
+    android:fillViewport="true"
+    android:overScrollMode="ifContentScrolls"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:id="@+id/loginContenido"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal|center_vertical"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingTop="40dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="32dp">
+
+        <!-- LOGO DIARIX -->
+
+        <ImageView
+            android:id="@+id/imgLogo"
+            android:layout_width="212dp"
+            android:layout_height="56dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="Logotipo de DiariX"
+            android:scaleType="fitCenter"
+            android:src="@drawable/diarix_logotipo" />
+
+        <!-- BIENVENIDA -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Bienvenido a DiariX"
+            android:textColor="@color/texto_principal_dark"
+            android:textSize="27sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:gravity="center"
+            android:text="Gestiona tus facturas de forma fácil y segura"
+            android:textColor="@color/gris_etiqueta"
+            android:textSize="14sp" />
+
+        <!-- FORMULARIO -->
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="26dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingStart="20dp"
+                android:paddingTop="24dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="24dp">
+
+                <!-- NIT -->
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:boxBackgroundColor="@color/white"
+                    app:boxCornerRadiusBottomEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxStrokeColor="@color/borde_campo"
+                    android:hint="NIT"
+                    app:hintTextColor="@color/etiqueta_campo"
+                    app:startIconDrawable="@drawable/ic_nit"
+                    app:startIconTint="@color/gris_etiqueta">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edtNit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionNext"
+                        android:inputType="number"
+                        android:maxLines="1"
+                        android:textColor="@color/texto_principal_dark"
+                        android:textSize="16sp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- USUARIO -->
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    app:boxBackgroundColor="@color/white"
+                    app:boxCornerRadiusBottomEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxStrokeColor="@color/borde_campo"
+                    android:hint="Usuario"
+                    app:hintTextColor="@color/etiqueta_campo"
+                    app:startIconDrawable="@drawable/ic_usuario"
+                    app:startIconTint="@color/gris_etiqueta">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edtEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionNext"
+                        android:inputType="textEmailAddress"
+                        android:maxLines="1"
+                        android:textColor="@color/texto_principal_dark"
+                        android:textSize="16sp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- CONTRASEÑA (con mostrar/ocultar nativo de Material) -->
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    app:boxBackgroundColor="@color/white"
+                    app:boxCornerRadiusBottomEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxStrokeColor="@color/borde_campo"
+                    app:endIconMode="password_toggle"
+                    android:hint="Contraseña"
+                    app:hintTextColor="@color/etiqueta_campo"
+                    app:startIconDrawable="@drawable/ic_password"
+                    app:startIconTint="@color/gris_etiqueta">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edtPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionDone"
+                        android:inputType="textPassword"
+                        android:maxLines="1"
+                        android:textColor="@color/texto_principal_dark"
+                        android:textSize="16sp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- ERROR (oculto hasta que haga falta) -->
+
+                <TextView
+                    android:id="@+id/txtError"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:gravity="center"
+                    android:textColor="@color/texto_error"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+
+                <!-- BOTÓN PRINCIPAL -->
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnEntrar"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="20dp"
+                    android:insetBottom="0dp"
+                    android:insetTop="0dp"
+                    android:text="INGRESAR"
+                    android:textAllCaps="false"
+                    android:textColor="@color/texto_boton_ingresar"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    app:backgroundTint="@color/bg_boton_ingresar"
+                    app:cornerRadius="16dp" />
+
+                <!-- SEPARADOR -->
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="22dp"
+                    android:layout_marginBottom="18dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1"
+                        android:background="@color/borde_suave" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="12dp"
+                        android:text="o"
+                        android:textColor="@color/gris_etiqueta"
+                        android:textSize="13sp" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1"
+                        android:background="@color/borde_suave" />
+
+                </LinearLayout>
+
+                <!-- BOTÓN GOOGLE -->
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnGoogle"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:insetBottom="0dp"
+                    android:insetTop="0dp"
+                    android:text="Registrarme con Google"
+                    android:textAllCaps="false"
+                    android:textColor="@color/texto_principal_dark"
+                    android:textSize="16sp"
+                    app:cornerRadius="16dp"
+                    app:icon="@drawable/ic_google"
+                    app:iconGravity="textStart"
+                    app:iconPadding="12dp"
+                    app:iconSize="20dp"
+                    app:strokeColor="@color/borde_suave"
+                    app:strokeWidth="1dp" />
+
+                <!-- PROGRESO -->
+
+                <ProgressBar
+                    android:id="@+id/progreso"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="20dp"
+                    android:indeterminateTint="@color/verde_pago"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- PIE -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="26dp"
+            android:gravity="center"
+            android:text="DiariX · tus facturas, siempre contigo"
+            android:textColor="@color/gris_etiqueta"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+</ScrollView>

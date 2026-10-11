@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DIARIX · seguridad de red (RELEASE)
+  ==========================================================================
+  En producción TODO el tráfico debe ir cifrado: el backend se sirve por
+  HTTPS en un dominio público, así que la app funciona igual desde cualquier
+  Wi-Fi (casa, oficina, datos móviles) sin conocer direcciones de red.
+
+  `cleartextTrafficPermitted="false"` bloquea cualquier intento de hablar
+  HTTP: si un build de release apuntara por error a una IP de la LAN, la
+  conexión fallaría aquí en vez de enviar datos sin cifrar.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>

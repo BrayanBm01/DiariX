@@ -41,6 +41,17 @@
 
     </LinearLayout>
 
+    <!--
+      Fase 0.1 · NO hay tira de área aquí.
+
+      Antes, bajo el encabezado, iba una banda con el nombre del área y un
+      "Cambiar". Se retiró de todas las pantallas a propósito: convertir el
+      cambio de área en algo que aparece en cada pantalla ensuciaba la interfaz
+      y quita sensación de aplicaciónterminada. El área se cambia ahora desde
+      Configuración y se elige una sola vez al entrar. Ver
+      `docs/FASE-0-SEPARACION-DE-MODOS.md`.
+    -->
+
     <!-- PESTAÑAS -->
 
     <com.google.android.material.tabs.TabLayout
@@ -152,13 +163,11 @@
 
     </FrameLayout>
 
-    <!-- MENU INFERIOR -->
-
+    <!-- BOTTOM NAV (cambio de rumbo pos-Fase 2: Registros vuelve a ser pestaña) -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
         style="@style/MenuInferiorCompacto"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:menu="@menu/menu_bottom"/>
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

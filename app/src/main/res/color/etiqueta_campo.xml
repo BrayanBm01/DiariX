@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+    Color de las etiquetas (labels) de los campos del Login: verde DiariX con
+    el campo enfocado y gris de la app en reposo.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:color="@color/verde_pago"
+        android:state_focused="true"/>
+
+    <item android:color="@color/gris_etiqueta"/>
+
+</selector>

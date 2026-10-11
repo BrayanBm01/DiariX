@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+    Texto del botón principal del Login.
+
+    Igual que el fondo, el texto baja de intensidad cuando el botón está
+    deshabilitado (mientras la app valida las credenciales) para que se vea
+    de un vistazo que todavía no se puede entrar.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:color="@color/white"
+        android:state_enabled="true"/>
+
+    <item android:color="#E3EAF3"/>
+
+</selector>

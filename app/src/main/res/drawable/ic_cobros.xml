@@ -1,0 +1,21 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+  <!--
+    DIARIX · Fase 1 · Icono de la pestaña COBROS.
+
+    Monedas apiladas (Material "payments"): es "alguien me paga", la acción
+    del día en el área de préstamos. Deliberadamente NO es `ic_receipt`, que en
+    esta app significa "factura de facturación"; reutilizarlo haría que las dos
+    mitades se confundieran en la barra. Tampoco es `ic_pagos`, que es la
+    tarjeta: cobrar y pagar son cosas distintas y por eso son dos pestañas.
+
+    Mismo relleno neutro `#e3e3e3` que el resto: lo tiñe el `itemIconTint` del
+    menú del área.
+  -->
+  <path
+      android:pathData="M480,480q-150,0 -255.5,-105.5T120,120h720q0,149.5 -105.5,255.5T480,480ZM480,480q-150,0 -255.5,105.5T120,840h720q0,-150 -105.5,-255.5T480,480ZM480,480q-110,0 -187.5,-77.5T215,215q0,-110 77.5,-187.5T480,-40q110,0 187.5,77.5T745,215q0,110 -77.5,187.5T480,480ZM480,480Z"
+      android:fillColor="#e3e3e3"/>
+</vector>

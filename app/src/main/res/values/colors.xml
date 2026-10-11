@@ -7,4 +7,20 @@
     <color name="naranja_pago">#FF9800</color>
     <color name="gris_etiqueta">#7A7A9D</color>
     <color name="texto_principal_dark">#1C2340</color>
+
+    <!--
+      Nombres de los colores que la app ya usaba en hexadecimal dentro de los
+      layouts y drawables. Se nominan aquí para que el Login (y lo que venga
+      después) use la MISMA paleta de siempre en vez de repetir literales.
+      Los valores son los que ya estaban en uso, no una paleta nueva.
+    -->
+    <!-- Fondo de todas las pantallas (#F0F3FA). -->
+    <color name="fondo_app">#F0F3FA</color>
+    <!-- Borde suave de tarjetas y separadores (#E3E8F2 / #D9E0EC). -->
+    <color name="borde_suave">#E3E8F2</color>
+    <color name="borde_foco">#D9E0EC</color>
+    <!-- Texto de error (#D93A3A). -->
+    <color name="texto_error">#D93A3A</color>
+    <!-- Verde DiariX atenuado para estados deshabilitados. -->
+    <color name="verde_pago_apagado">#B4C1D2</color>
 </resources>

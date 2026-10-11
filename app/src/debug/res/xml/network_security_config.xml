@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DIARIX · seguridad de red (DEBUG)
+  ==========================================================================
+  Solo en depuración se permite HTTP sin cifrar, porque el backend de
+  desarrollo vive en el equipo del programador: `10.0.2.2` desde el emulador
+  o una IP de la LAN desde un teléfono físico.
+
+  Este archivo de `src/debug` sustituye al de `src/main` únicamente en los
+  builds de debug. El APK de release conserva la prohibición de cleartext.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

@@ -25,4 +25,61 @@
         <item name="itemTextColor">@color/menu_colors</item>
         <item name="labelVisibilityMode">selected</item>
     </style>
+
+    <!--
+      DIARIX · Fase 1 · Menú inferior del área de PRÉSTAMOS.
+
+      Hereda de `MenuInferiorCompacto` y cambia SOLO el selector de color, de
+      forma que hereda también todo lo que se ajuste en el estilo base sin que
+      esta copia se quede desfasada. Lo único que no se puede heredar son los
+      dos `*Tint`, porque son referencias a recursos: si se dejaran apuntando a
+      `@color/menu_colors`, el menú de préstamos se pondría en el verde de
+      facturación y las dos mitades de la app se parecerían en la única cosa
+      que hay que distinguir de un vistazo.
+
+      Y no se fija por código con `setItemIconTint`: el área se decide al
+      inflar el menú, y un `setItemIconTint` en el `onCreate` de cada pantalla
+      es un paso que un layout nuevo puede no hacer. Con un estilo por área, el
+      color va en el mismo sitio donde ya vive el resto del estilo y no hay nada
+      que recordar.
+    -->
+    <style name="MenuInferiorCompactoPrestamos" parent="MenuInferiorCompacto">
+        <item name="itemIconTint">@color/menu_colors_prestamos</item>
+        <item name="itemTextColor">@color/menu_colors_prestamos</item>
+    </style>
+
+    <!--
+      DIARIX · Fase 0.1 · Título de sección de Configuración.
+
+      Van en un `style` y no repetidos en cada sección porque son cinco bloques
+      idénticos y el día que cambie el estilo de uno tiene que cambiar en los
+      cinco. Mayúsculas, pequeño y en el color de las etiquetas: marca la
+      lectura de arriba abajo sin competir con el contenido.
+    -->
+    <style name="TituloDeSeccion">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">20dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:textColor">#7A7A9D</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.06</item>
+    </style>
+
+    <!--
+      Separador entre filas de la MISMA tarjeta.
+
+      Indenta 20dp para que la línea empiece donde empieza el texto de la fila y
+      no en el borde de la tarjeta: una línea que atraviesa la carta entera
+      parte la pantalla en dos bloques que no son los bloques de arriba.
+    -->
+    <style name="SeparadorDeFila">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_marginStart">20dp</item>
+        <item name="android:layout_marginEnd">20dp</item>
+        <item name="android:background">#E3E8F2</item>
+    </style>
 </resources>

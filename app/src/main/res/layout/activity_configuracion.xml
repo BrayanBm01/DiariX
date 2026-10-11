@@ -1,143 +1,867 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<!--
+  DIARIX · Fase 0.1 · Configuración como pantalla de verdad.
+
+  Antes eran tres tarjetas con botones giants ("Seleccionar QR", "Exportar
+  respaldo", "Importar respaldo", "Cerrar sesión") apiladas sin ninguna
+  jerarquía: cuatro botones del mismo peso, y no se distinguía lo cotidiano de
+  lo que destruye datos. Ahora son SECCIONES con título, y dentro de cada una,
+  filas agrupadas.
+
+  LAS REGLAS QUE SIGUE ESTE LAYOUT
+
+  1. Una fila que lleva chevron abre algo de verdad. Una fila que solo muestra
+     un dato no lleva chevron. Nunca al revés: un chevron que no lleva a
+     ningún sitio es peor que no tener chevron.
+
+  2. "Cerrar sesión" no es una fila más. Va sola, al final, en una tarjeta
+     propia y con el color de error, porque deshace lo que el usuario hizo y
+     por eso no puede mezclarse con "elegir un color".
+
+  3. Solo hay filas que funcionan. No se announce una sección de "Notificaciones"
+     ni un interruptor de "Tema oscuro": hoy DiariX no tiene ninguno de los dos,
+     y un control que no hace nada enseña a desconfiar de los que sí hacen algo.
+     Lo que falta está anotado en `docs/FASE-0-SEPARACION-DE-MODOS.md`.
+
+  4. Todo cabe en un teléfono pequeño: los textos se reparten con `layout_weight`
+     y `ellipsize`, y el chevron tiene un margen fijo, de modo que un correo
+     largo o un nombre largo recortan SU texto y nunca empujan el chevron fuera
+     de la pantalla.
+-->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#F0F3FA">
+    android:background="#F0F3FA"
+    android:orientation="vertical">
 
-    <!-- HEADER -->
+    <!-- ENCABEZADO -->
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#FFFFFF"
         android:elevation="4dp"
-        android:orientation="horizontal"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="16dp"
-        android:paddingTop="40dp">
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingTop="40dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="16dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Configuración"
+            android:text="@string/configuracion_titulo"
+            android:textColor="#1C2340"
             android:textSize="26sp"
-            android:textStyle="bold"
-            android:textColor="#1C2340"/>
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/configuracion_subtitulo"
+            android:textColor="#7A7A9D"
+            android:textSize="13sp" />
 
     </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:scrollbars="none">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingStart="16dp"
+            android:paddingTop="18dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="28dp">
 
-            <!-- QR -->
+            <!-- =================================================================
+                 PERFIL
+                 ================================================================= -->
+
+            <TextView
+                style="@style/TituloDeSeccion"
+                android:text="@string/configuracion_seccion_perfil" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="20dp"
                 app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="20dp"
                 app:cardElevation="2dp">
 
                 <LinearLayout
+                    android:id="@+id/filaEditarPerfil"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:orientation="vertical"
                     android:padding="20dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Código QR"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="#1C2340"/>
+                    <!--
+                      AVATAR + NOMBRE + CORREO
 
-                    <Button
-                        android:id="@+id/btnCambiarQr"
+                      El avatar son las iniciales del nombre real. El correo es
+                      el de la sesión y no se puede tocar: se explica abajo, con
+                      una etiqueta, en vez de dejarlo en un campo que parece
+                      editable y no lo es.
+                    -->
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="18dp"
-                        android:backgroundTint="#0AA87A"
-                        android:text="Seleccionar QR"
-                        android:textAllCaps="false"
-                        android:textColor="#FFFFFF"/>
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/txtIniciales"
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            android:background="@drawable/bg_avatar"
+                            android:gravity="center"
+                            android:text="—"
+                            android:textColor="#0AA87A"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/txtNombrePerfil"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:ellipsize="end"
+                                android:maxLines="2"
+                                android:text="@string/perfil_sin_nombre"
+                                android:textColor="#1C2340"
+                                android:textSize="17sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/txtCorreoPerfil"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:ellipsize="end"
+                                android:maxLines="1"
+                                android:textColor="#7A7A9D"
+                                android:textSize="13sp" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!--
+                      CUENTA VINCULADA A GOOGLE
+
+                      Solo aparece cuando la cuenta ES de Google. No se puede
+                      deducir del perfil (el backend no lo expone) y no se
+                      inventa: `SessionManager` no cambia, `perfilActual` dice si
+                      se entró por Google o con contraseña. Si algún día el
+                      backend lo expone, esta fila empieza a salir sola.
+                    -->
 
                     <TextView
-                        android:id="@+id/txtEstadoQr"
+                        android:id="@+id/etiquetaGoogle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
+                        android:layout_marginTop="14dp"
+                        android:background="@drawable/bg_etiqueta_config"
+                        android:drawablePadding="8dp"
+                        android:gravity="center_vertical"
+                        android:paddingStart="10dp"
+                        android:paddingTop="6dp"
+                        android:paddingEnd="10dp"
+                        android:paddingBottom="6dp"
+                        android:text="@string/perfil_cuenta_google"
+                        android:textColor="#5A6182"
+                        android:textSize="12sp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/txtTelefonoPerfil"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="No hay un código QR configurado"
-                        android:textColor="#D32F2F"
-                        android:textStyle="bold"
-                        android:textSize="14sp"/>
+                        android:textColor="#7A7A9D"
+                        android:textSize="13sp"
+                        android:visibility="gone" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="16dp"
+                        android:background="#E3E8F2" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/perfil_editar"
+                            android:textColor="#2B6ED4"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:contentDescription="@string/perfil_editar"
+                            android:src="@drawable/ic_chevron"
+                            app:tint="#8C8C8C" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>
 
-            <!-- CSV -->
+            <!-- =================================================================
+                 CUENTA
+                 ================================================================= -->
+
+            <TextView
+                style="@style/TituloDeSeccion"
+                android:text="@string/configuracion_seccion_cuenta" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:cardCornerRadius="20dp"
                 app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="20dp"
                 app:cardElevation="2dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Base de datos"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="#1C2340"/>
+                    <!--
+                      MODO DE DIARIX
 
+                      Es el cambio de área, y es la ÚNICA fila de toda la app que
+                      lo hace. La barra de color junto al título dice en qué área
+                      se está (verde facturación, azul préstamos) sin tener que
+                      leer: mismo lenguaje que el selector.
+                    -->
 
-                    <Button
-                        android:id="@+id/btnExportarCsv"
+                    <LinearLayout
+                        android:id="@+id/filaModo"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="18dp"
-                        android:backgroundTint="#2B6ED4"
-                        android:text="Exportar respaldo"
-                        android:textAllCaps="false"
-                        android:textColor="#FFFFFF"/>
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="20dp"
+                        android:paddingTop="16dp"
+                        android:paddingEnd="20dp"
+                        android:paddingBottom="16dp">
 
-                    <Button
-                        android:id="@+id/btnImportarCsv"
+                        <View
+                            android:id="@+id/barraModo"
+                            android:layout_width="4dp"
+                            android:layout_height="38dp"
+                            android:background="@drawable/bg_modo_facturacion" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/configuracion_modo"
+                                android:textColor="#1C2340"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/txtModoActual"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="@string/modo_facturacion"
+                                android:textColor="#0AA87A"
+                                android:textSize="13sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/txtAyudaModo"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/configuracion_modo_ayuda"
+                                android:textColor="#7A7A9D"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:background="@drawable/bg_opcion_modo"
+                            android:paddingStart="12dp"
+                            android:paddingTop="7dp"
+                            android:paddingEnd="12dp"
+                            android:paddingBottom="7dp"
+                            android:text="@string/configuracion_modo_cambiar"
+                            android:textColor="#2B6ED4"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <View style="@style/SeparadorDeFila" />
+
+                    <!--
+                      ESTADO DE SESIÓN
+
+                      SIN CHEVRON: no abre nada. Muestra un dato. Si algún día
+                      abre una pantalla de detalle, entonces lleva chevron.
+                    -->
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:backgroundTint="#FF9800"
-                        android:text="Importar respaldo"
-                        android:textAllCaps="false"
-                        android:textColor="#FFFFFF"/>
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="20dp"
+                        android:paddingTop="16dp"
+                        android:paddingEnd="20dp"
+                        android:paddingBottom="16dp">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:contentDescription="@string/configuracion_sesion"
+                            android:src="@drawable/ic_usuario"
+                            app:tint="#7A7A9D" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/configuracion_sesion"
+                                android:textColor="#1C2340"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/txtEstadoSesion"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:textColor="#7A7A9D"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <View style="@style/SeparadorDeFila" />
+
+                    <!--
+                      CERRAR SESIÓN EN TODOS LOS DISPOSITIVOS
+
+                      Con chevron porque abre una confirmación. Existe porque el
+                      backend ya la tenía (`POST /auth/logout-todos`) y "Sesión y
+                      seguridad" con una sola opción no es una sección.
+                    -->
+
+                    <LinearLayout
+                        android:id="@+id/filaCerrarSesionTodos"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="20dp"
+                        android:paddingTop="16dp"
+                        android:paddingEnd="20dp"
+                        android:paddingBottom="16dp">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:contentDescription="@string/configuracion_cerrar_todos"
+                            android:src="@drawable/ic_seguridad"
+                            app:tint="#7A7A9D" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/configuracion_cerrar_todos"
+                                android:textColor="#1C2340"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="@string/configuracion_cerrar_todos_ayuda"
+                                android:textColor="#7A7A9D"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:contentDescription="@string/configuracion_cerrar_todos"
+                            android:src="@drawable/ic_chevron"
+                            app:tint="#8C8C8C" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>
+
+            <!-- =================================================================
+                 COMPROBANTES
+                 ================================================================= -->
+
+            <TextView
+                style="@style/TituloDeSeccion"
+                android:text="@string/configuracion_seccion_comprobantes" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp">
+
+                    <LinearLayout
+                        android:id="@+id/filaQr"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="20dp"
+                        android:paddingTop="16dp"
+                        android:paddingEnd="20dp"
+                        android:paddingBottom="16dp">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:contentDescription="@string/configuracion_qr"
+                            android:src="@drawable/ic_qr"
+                            app:tint="#7A7A9D" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/configuracion_qr"
+                                android:textColor="#1C2340"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/txtEstadoQr"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:textColor="#7A7A9D"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:contentDescription="@string/configuracion_qr_cambiar"
+                            android:src="@drawable/ic_chevron"
+                            app:tint="#8C8C8C" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- =================================================================
+                 RESPALDO
+                 ================================================================= -->
+
+            <TextView
+                style="@style/TituloDeSeccion"
+                android:text="@string/configuracion_seccion_respaldo" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp">
+
+                    <LinearLayout
+                        android:id="@+id/filaExportar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="20dp"
+                        android:paddingTop="16dp"
+                        android:paddingEnd="20dp"
+                        android:paddingBottom="16dp">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:contentDescription="@string.configuracion_exportar"
+                            android:src="@drawable/ic_archivo"
+                            app:tint="#7A7A9D" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/configuracion_exportar"
+                                android:textColor="#1C2340"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="@string/configuracion_exportar_ayuda"
+                                android:textColor="#7A7A9D"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:contentDescription="@string/configuracion_exportar"
+                            android:src="@drawable/ic_chevron"
+                            app:tint="#8C8C8C" />
+
+                    </LinearLayout>
+
+                    <View style="@style/SeparadorDeFila" />
+
+                    <LinearLayout
+                        android:id="@+id/filaImportar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="20dp"
+                        android:paddingTop="16dp"
+                        android:paddingEnd="20dp"
+                        android:paddingBottom="16dp">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:contentDescription="@string/configuracion_importar"
+                            android:src="@drawable/ic_gallery"
+                            app:tint="#7A7A9D" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/configuracion_importar"
+                                android:textColor="#1C2340"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="@string/configuracion_importar_ayuda"
+                                android:textColor="#7A7A9D"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:contentDescription="@string/configuracion_importar"
+                            android:src="@drawable/ic_chevron"
+                            app:tint="#8C8C8C" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- =================================================================
+                 INFORMACIÓN
+                 ================================================================= -->
+
+            <TextView
+                style="@style/TituloDeSeccion"
+                android:text="@string/configuracion_seccion_informacion" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp">
+
+                    <LinearLayout
+                        android:id="@+id/filaAyuda"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="20dp"
+                        android:paddingTop="16dp"
+                        android:paddingEnd="20dp"
+                        android:paddingBottom="16dp">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:contentDescription="@string/configuracion_ayuda"
+                            android:src="@drawable/ic_ayuda"
+                            app:tint="#7A7A9D" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
+                            android:layout_weight="1"
+                            android:text="@string/configuracion_ayuda"
+                            android:textColor="#1C2340"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:contentDescription="@string/configuracion_ayuda"
+                            android:src="@drawable/ic_chevron"
+                            app:tint="#8C8C8C" />
+
+                    </LinearLayout>
+
+                    <View style="@style/SeparadorDeFila" />
+
+                    <LinearLayout
+                        android:id="@+id/filaAcercaDe"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="20dp"
+                        android:paddingTop="16dp"
+                        android:paddingEnd="20dp"
+                        android:paddingBottom="16dp">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:contentDescription="@string/configuracion_acerca_de"
+                            android:src="@drawable/ic_info"
+                            app:tint="#7A7A9D" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
+                            android:layout_weight="1"
+                            android:text="@string/configuracion_acerca_de"
+                            android:textColor="#1C2340"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:contentDescription="@string/configuracion_acerca_de"
+                            android:src="@drawable/ic_chevron"
+                            app:tint="#8C8C8C" />
+
+                    </LinearLayout>
+
+                    <View style="@style/SeparadorDeFila" />
+
+                    <!--
+                      VERSIÓN — sin chevron, porque no lleva a ningún sitio.
+                      El número sale de `BuildConfig` (que es el mismo del APK
+                      instalado) y nunca escrito a mano: un "1.0.1" en un texto
+                      es una mentira en cuanto se publica la 1.0.2.
+                    -->
+
+                    <LinearLayout
+                        android:id="@+id/filaVersion"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="20dp"
+                        android:paddingTop="16dp"
+                        android:paddingEnd="20dp"
+                        android:paddingBottom="16dp">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:alpha="0.55"
+                            android:contentDescription="@string/configuracion_version"
+                            android:src="@drawable/ic_receipt"
+                            app:tint="#7A7A9D" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
+                            android:layout_weight="1"
+                            android:text="@string/configuracion_version"
+                            android:textColor="#1C2340"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/txtVersion"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:textColor="#7A7A9D"
+                            android:textSize="13sp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- =================================================================
+                 SALIR — separado, con su propio peso visual
+                 ================================================================= -->
+
+            <Button
+                android:id="@+id/btnCerrarSesion"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="24dp"
+                android:backgroundTint="#D93A3A"
+                android:text="@string/configuracion_cerrar_sesion"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center"
+                android:text="@string/configuracion_cerrar_sesion_ayuda"
+                android:textColor="#7A7A9D"
+                android:textSize="12sp" />
 
         </LinearLayout>
 
@@ -147,7 +871,6 @@
         android:id="@+id/bottomNav"
         style="@style/MenuInferiorCompacto"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:menu="@menu/menu_bottom"/>
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

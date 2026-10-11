@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  DIARIX · Fase 1 · Menú del área de PRÉSTAMOS.
+
+  Las CINCO pestañas del área, en el orden en que se usan: qué gestiono, quién
+  me debe, qué le presté, qué estoy cobrando y qué he cobrado.
+
+  DOS COSAS QUE ESTE MENÚ NO DEBE ROMPER, Y POR QUÉ:
+
+  1. NINGUNA pestaña de facturación. Los ids de aquí llevan el prefijo
+     `nav_prestamos_` y no se reutiliza ninguno de facturación — ni siquiera
+     `nav_inicio`, que existiría y sería tentador: "Inicio" también es una
+     pestaña de facturación, y si dos áreas compartieran un id, el mapa de
+     destinos no podría saber a qué pantalla llevar. Prefijar cuesta cuatro
+     letras; mezclarse cuesta una pantalla equivocada.
+
+  2. NINGÚN acceso a Configuración ni a un cambio de área. Configuración no es
+     un módulo de este área: es de la aplicación entera, y su acceso desde
+     Préstamos es el engranaje del encabezado, igual que en Facturación. Meter
+     aquí un "Cambiar modo" convertiría el área en un lugar donde se puede
+     saltar la decisión que vive en Configuración, y las dos formas de cambiar
+     de área se desincronizan en cuanto una de las dos se olvida.
+
+  Se infla desde el código con `MenuDeModo`, igual que `menu_facturacion`;
+  ningún layout declara `app:menu`.
+-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_prestamos_inicio"
+        android:icon="@drawable/ic_home"
+        android:title="@string/pestana_inicio" />
+
+    <item
+        android:id="@+id/nav_prestamos_clientes"
+        android:icon="@drawable/ic_clientes"
+        android:title="@string/pestana_clientes" />
+
+    <item
+        android:id="@+id/nav_prestamos_prestamos"
+        android:icon="@drawable/ic_prestamos"
+        android:title="@string/pestana_prestamos" />
+
+    <item
+        android:id="@+id/nav_prestamos_cobros"
+        android:icon="@drawable/ic_cobros"
+        android:title="@string/pestana_cobros" />
+
+    <item
+        android:id="@+id/nav_prestamos_pagos"
+        android:icon="@drawable/ic_pagos"
+        android:title="@string/pestana_pagos" />
+
+</menu>

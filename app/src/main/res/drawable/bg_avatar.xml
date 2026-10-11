@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Círculo del avatar de "Mi perfil".
+
+  No es una foto porque no hay foto: ni `users` tiene columna ni el backend
+  guarda la de Google (solo conserva `googleSub` y el nombre). El círculo lleva
+  las iniciales del nombre real, escritas por `PerfilEditable.iniciales`.
+
+  Un círculo verde muy suave y no el verde de marca: el avatar es contenido, no
+  un botón, y si se pintara con el color de acción competiría con los botones
+  de verdad que hay debajo.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+
+    <solid android:color="#E3F5EF" />
+
+</shape>

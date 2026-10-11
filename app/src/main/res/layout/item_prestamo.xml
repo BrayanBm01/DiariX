@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DIARIX · Fase 3 · Fila de un préstamo en el listado.
+
+  Misma forma que `item_cliente`: tarjeta blanca de esquinas redondeadas.
+  Dos columnas para el dinero (prestado / a pagar) porque la pregunta que se
+  responde al recorrer el listado es "¿cuánto presté y cuánto me deben?"; la
+  fila lleva además el estado derivado (RF-09) en el texto de color.
+
+  El color del estado se pone desde el código ([EstadosDePrestamo.color]),
+  no aquí: un estado no tiene un color por decreto del XML.
+-->
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardBackgroundColor="#FFFFFF"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- CABECERA: quién debe y en qué estado -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/txtNombrePrestamo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="#1C2340"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:hint="Cliente"/>
+
+            <TextView
+                android:id="@+id/txtEstadoPrestamo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_chip_normal"
+                android:paddingStart="12dp"
+                android:paddingTop="5dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="5dp"
+                android:textColor="#2B6ED4"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:hint="Estado"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/txtDocumentoPrestamo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#7A7A9D"
+            android:textSize="13sp"
+            android:hint="Documento"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="#E9EDF6"/>
+
+        <!-- DOS COLUMNAS: prestado y a pagar -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Prestado"
+                    android:textColor="#7A7A9D"
+                    android:textSize="11sp"/>
+
+                <TextView
+                    android:id="@+id/txtMontoPrestado"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="#1C2340"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:hint="$0"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="A pagar"
+                    android:textColor="#7A7A9D"
+                    android:textSize="11sp"/>
+
+                <TextView
+                    android:id="@+id/txtTotalPrestamo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="#1C2340"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:hint="$0"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- PIE: saldo pendiente y avance con el calendario -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Saldo"
+                android:textColor="#7A7A9D"
+                android:textSize="12sp"/>
+
+            <TextView
+                android:id="@+id/txtSaldoPrestamo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_weight="1"
+                android:textColor="#1C2340"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:hint="$0"/>
+
+            <TextView
+                android:id="@+id/txtCuotasPrestamo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#7A8194"
+                android:textSize="12sp"
+                android:hint="3 de 12 cuotas"/>
+
+        </LinearLayout>
+
+        <!-- INDICADOR DE APERTURA -->
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="end"
+            android:layout_marginTop="10dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_chevron"
+            android:rotation="-90"
+            app:tint="#B4C1D2"/>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

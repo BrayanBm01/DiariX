@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DIARIX · Fase 2 · Fila de un cliente en el listado.
+
+  Misma forma que `item_factura`: tarjeta blanca de esquinas redondeadas con
+  la información a la izquierda y el indicador de que se puede abrir a la
+  derecha. No lleva botón de eliminar aquí: el borrado es una operación
+  destructiva y va dentro de la ficha, donde se ve el nombre y el documento
+  completos antes de confirmar, en vez de a un toque distraído en una lista
+  que el dedo recorre con el pulgar.
+
+  Los tres `TextView` no llevan `android:text`: el contenido lo pone el
+  adaptador en cada enlace. El `hint` basta para que la vista previa del
+  diseñador muestre algo y no hace falta duplicar el texto en dos sitios.
+-->
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardBackgroundColor="#FFFFFF"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <!-- IDENTIDAD -->
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txtClienteNombre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="#1C2340"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:hint="Nombre del cliente"/>
+
+            <TextView
+                android:id="@+id/txtClienteDocumento"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="#7A7A9D"
+                android:textSize="13sp"
+                android:hint="Tipo y número de documento"/>
+
+            <TextView
+                android:id="@+id/txtClienteContacto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="#7A8194"
+                android:textSize="13sp"
+                android:hint="Teléfono o correo"/>
+
+        </LinearLayout>
+
+        <!-- INDICADOR DE APERTURA -->
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="12dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_chevron"
+            app:tint="#B4C1D2"/>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

@@ -40,6 +40,17 @@
 
     </LinearLayout>
 
+    <!--
+      Fase 0.1 · NO hay tira de área aquí.
+
+      Antes, bajo el encabezado, iba una banda con el nombre del área y un
+      "Cambiar". Se retiró de todas las pantallas a propósito: convertir el
+      cambio de área en algo que aparece en cada pantalla ensuciaba la interfaz
+      y quita sensación de aplicaciónterminada. El área se cambia ahora desde
+      Configuración y se elige una sola vez al entrar. Ver
+      `docs/FASE-0-SEPARACION-DE-MODOS.md`.
+    -->
+
     <!-- CONTENIDO -->
     <ScrollView
         android:layout_width="match_parent"
@@ -88,6 +99,16 @@
                         android:layout_height="wrap_content"
                         android:text="0 facturas"
                         android:textColor="#7A7A9D"/>
+
+                    <!-- Fase 4 · estado de sincronización (online/offline/pendientes) -->
+                    <TextView
+                        android:id="@+id/txtEstadoSync"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:textColor="#7A7A9D"
+                        android:textSize="13sp"
+                        android:visibility="gone"/>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -328,7 +349,6 @@
         android:id="@+id/bottomNav"
         style="@style/MenuInferiorCompacto"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:menu="@menu/menu_bottom"/>
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

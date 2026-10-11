@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  DIARIX · Fase 1 · Pantalla base de una sección del área de PRÉSTAMOS.
+
+  Un layout para las cuatro secciones nuevas (Clientes, Préstamos, Cobros,
+  Pagos) y no cuatro: las cuatro son exactamente la misma pantalla con otros
+  textos, y cuatro copias de un esqueleto son cuatro sitios donde el próximo
+  cambio se aplica en tres. El título y los dos textos del estado vacío se
+  escriben desde el código, en [PantallaDePrestamos].
+
+  LO QUE NO HAY AQUÍ, Y ES LO IMPORTANTE:
+
+  - Ningún dato de ejemplo. Ni un cliente de nombre "Juan Pérez", ni un
+    préstamo de $500.000, ni un cobro de hoy. Un dato inventado en una pantalla
+    de producción es peor que una pantalla vacía: alguien lo toma por real, se
+    lo enseña a un cliente, y hay que BORRARLO después. La Fase 1 no tiene
+    backend de préstamos, así que cualquier cifra aquí sería inventada.
+
+  - Ninguna llamada a un endpoint que no existe. No hay repositorio de
+    préstamos que consultar porque el módulo no se ha construido; una llamada
+    a una ruta futura fallaría en producción con un error que nadie sabe
+    interpretar.
+
+  - Ningún botón que no lleve a ninguna parte. Las cuatro secciones son
+    pestañas del menú inferior, y el menú es lo que navega. Un botón "Registrar
+    cliente" sin formulario detrás sería un botón que no hace nada.
+
+  La estructura es la de `activity_prestamos_inicio.xml`: cabecera fija,
+  contenido con peso, barra fija abajo. Se copia en vez de meterse en un
+  `<include>` porque los `layout_weight` de un padre no sobreviven a ser
+  incluidos, y un esqueleto que hay que "arreglar" en cada sitio acaba
+  sustituido.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F0F3FA"
+    android:orientation="vertical">
+
+    <!--
+      ENCABEZADO
+
+      Idéntico al de las demás pantallas del área, logo y engranaje incluidos:
+      quien pasa de Inicio a Clientes tiene que seguir reconociendo que sigue
+      dentro de DiariX y no dentro de otra aplicación.
+    -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:elevation="4dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingTop="40dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="16dp">
+
+        <ImageView
+            android:layout_width="300dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/app_name"
+            android:scaleType="fitStart"
+            android:src="@drawable/diarix_logotipo" />
+
+        <ImageButton
+            android:id="@+id/btnAbrirConfiguracion"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/configuracion_titulo"
+            android:padding="10dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_settings"
+            app:tint="#5A6182" />
+
+    </LinearLayout>
+
+    <!-- CONTENIDO -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!--
+              El título va en el contenido y no en el encabezado a propósito.
+              Con cinco pestañas en la barra, un encabezado fijo con el nombre
+              de la sección es lo que distingue una pantalla de otra cuando ya
+              no se puede usar el título del área para saber dónde se está.
+            -->
+            <TextView
+                android:id="@+id/txtTituloSeccion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#1C2340"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/prestamos_area_activa"
+                android:textColor="#7A7A9D"
+                android:textSize="13sp" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:padding="28dp">
+
+                    <!--
+                      Icono grande y neutro. Es el único elemento "decorativo" de
+                      la pantalla, y no lleva el color del área a propósito: un
+                      bloque de color grande en el centro de cuatro pantallas
+                      idénticas parecería contenido, y aquí no lo hay.
+                    -->
+                    <ImageView
+                        android:id="@+id/icSeccion"
+                        android:layout_width="72dp"
+                        android:layout_height="72dp"
+                        android:alpha="0.35"
+                        android:contentDescription="@null"
+                        android:scaleType="fitCenter"
+                        app:tint="#5A6182" />
+
+                    <TextView
+                        android:id="@+id/txtVacioTitulo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
+                        android:gravity="center"
+                        android:textColor="#1C2340"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txtVacioDetalle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:gravity="center"
+                        android:lineSpacingExtra="2dp"
+                        android:textColor="#7A7A9D"
+                        android:textSize="14sp" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!--
+      MENÚ INFERIOR DEL ÁREA
+
+      `MenuInferiorCompactoPrestamos`, y no el de facturación: es el único punto
+      donde se decide que la pestaña seleccionada va en azul, que es el azul del
+      área de préstamos.
+    -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        style="@style/MenuInferiorCompactoPrestamos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

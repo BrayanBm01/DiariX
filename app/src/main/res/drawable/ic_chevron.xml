@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Chevron de "esta fila lleva a otra pantalla".
+
+  Se pone SOLO en las filas que de verdad abren algo. Una fila que parece botón
+  y no lo es es el error más caro de una pantalla de ajustes: el usuario la
+  toca, no pasa nada y deja de fiarse de las demás. Las filas que solo
+  muestran un dato (versión, estado) NO llevan chevron, y por eso existen.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M504,480 L320,296 L376,240 L616,480 L376,720 L320,664 Z" />
+
+</vector>

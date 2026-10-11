@@ -1,0 +1,15 @@
+<!--
+  DIARIX · Fase 3 · Calendario (fecha de vencimiento de una cuota).
+
+  Trazo del calendario de Material con el mismo `fillColor` gris neutro de los
+  demás iconos de la app: el color final lo pone el tint del layout que lo usa.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="20dp"
+    android:height="20dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+  <path
+      android:fillColor="#e3e3e3"
+      android:pathData="M200,960q-33,0 -56.5,-23.5T120,880V272q0,-33 23.5,-56.5T200,192h40V96h96v96h288V96h96v96h40q33,0 56.5,23.5T840,272v608q0,33 -23.5,56.5T760,960H200ZM200,880h560V416H200v464ZM200,352h560V272H200v80ZM456,720v-80h80v80h-80ZM296,720v-80h80v80h-80ZM616,720v-80h80v80h-80ZM456,576v-80h80v80h-80ZM296,576v-80h80v80h-80ZM616,576v-80h80v80h-80Z"/>
+</vector>

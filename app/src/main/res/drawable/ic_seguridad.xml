@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Escudo: la fila "Cerrar sesión en todos los dispositivos" de Configuración.
+
+  Distinto del candado o de la llave porque aquí no se está QUITANDO la
+  seguridad de ninguna parte: se está cerrando el acceso desde otros sitios.
+  Mismo criterio de viewport que el resto de iconos.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M480,80 L200,170v274q0,193 118,344 118,151 310,212 87,-31 162,-93t124,-119q59,-86 59,-186 0,-74 -20,-150 -16,-60 -47,-118t-75,-102q-44,-44 -92,-76T638,92q-50,20 -100,20t-100,-20q-57,16 -105,50 -48,34 -92,76 -44,44 -75,102 -31,58 -47,118 -20,76 -20,150 0,100 59,186 60,86 124,119t162,93q192,-61 310,-212 118,-151 118,-344L760,170L480,80ZM480,840q-118,-51 -190,-158 -72,-107 -72,-238v-205l180,-57 180,57v205q0,131 -72,238 -72,107 -190,158ZM480,520q42,0 71,-29t29,-71q0,-42 -29,-71t-71,-29q-41,0 -70,29t-29,71q0,42 29,71t70,29Z" />
+
+</vector>

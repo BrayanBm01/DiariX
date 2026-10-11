@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+    Borde de los campos del Login: verde DiariX al enfocar y gris suave en
+    reposo, para que se vea de un vistazo qué campo está activo.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:color="@color/verde_pago"
+        android:state_focused="true"/>
+
+    <item
+        android:color="@color/verde_pago"
+        android:state_hovered="true"/>
+
+    <item android:color="@color/borde_foco"/>
+
+</selector>

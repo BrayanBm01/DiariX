@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  "i" dentro de un círculo: la fila "Acerca de DiariX".
+
+  Distinto de `ic_ayuda` a propósito. Son dos cosas distintas y una de las
+  recomendaciones de diseño más básicas es no recycled el icono de "ayuda" para
+  decir "acerca de": quien busca ayuda y quien busca la versión son dos
+  intenciones diferentes.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M480,80q-186,0 -313,127T40,520t127,313 313,127 313,-127 127,-313 -127,-313T480,80ZM480,880q-150,0 -255,-105T120,520 225,215 480,110 255,-105 255,-305 -105,-255ZM512,728h-64v-96h64v96ZM512,520v-296h64v296h-64Z" />
+
+</vector>

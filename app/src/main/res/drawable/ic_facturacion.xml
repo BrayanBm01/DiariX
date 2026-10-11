@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Icono del área de FACTURACIÓN para la pantalla de selección de modo.
+
+  Mismo criterio que `ic_prestamos`: viewport de 960 y un solo trazo, para que
+  los dos iconos de la pantalla pesen lo mismo a la vista. Es una hoja con las
+  líneas de una factura y el total marcado, que es lo que el área registra.
+
+  El color NO va aquí: lo pone el `android:tint` del `ImageView` con el color
+  del área (verde facturación, azul préstamos), igual que hace el menú inferior
+  con su propio `itemIconTint`.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M200,120h560a40,40 0,0 1,40 40v640a40,40 0,0 1,-40 40h-560a40,40 0,0 1,-40 -40v-640a40,40 0,0 1,40 -40zM240,200v560h480v-560z" />
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M320,280h320v56h-320z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M320,412h320v56h-320z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M320,544h200v56h-200z" />
+
+</vector>

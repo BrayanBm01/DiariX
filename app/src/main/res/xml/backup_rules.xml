@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-   Sample backup rules file; uncomment and customize as necessary.
-   See https://developer.android.com/guide/topics/data/autobackup
-   for details.
-   Note: This file is ignored for devices older than API 31
-   See https://developer.android.com/about/versions/12/backup-restore
+   Reglas de copia de seguridad (Fase 4).
+
+   El archivo de credenciales queda FUERA a propósito: está cifrado con una
+   clave que vive en el Keystore del dispositivo y esa clave nunca se copia.
+   Un token respaldado sería, en el mejor caso, ilegible; en el peor, material
+   cifrado viajando fuera del dispositivo sin necesidad.
+
+   Las facturas (SQLite `facturas.db`) SÍ se respaldan: son datos del usuario
+   y deben sobrevivir a un cambio de teléfono.
 -->
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <exclude domain="file" path="diarix_credenciales.bin"/>
 </full-backup-content>

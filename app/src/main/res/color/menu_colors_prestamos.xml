@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  DIARIX · Fase 1 · Colores del menú inferior del área de PRÉSTAMOS.
+
+  Es una COPIA de `menu_colors.xml` con el verde de facturación sustituido por
+  el azul de préstamos, y no un selector con dos colores dentro. La razón es que
+  el color de la pestaña seleccionada es lo que le dice a alguien, con solo
+  mirar la barra, en qué área está: si el mismo recurso sirviera para las dos,
+  habría que cambiarlo en tiempo de ejecución y el estado del menú dependería
+  de un `setItemIconTint` que cualquier layout nuevo podría olvidarse de
+  llamar. Dos recursos, cada uno con su área, y no hay estado que sincronizar.
+
+  El azul `#2B6ED4` es el de `bg_modo_prestamos.xml`: el mismo que usa la
+  etiqueta del área en el selector, y el segundo color de la paleta que la app
+  ya tenía. El gris sin seleccionar es el MISMO `#8C8C8C` que en facturación,
+  porque "pestaña no elegida" no pertenece a ningún área: si también fuera azul,
+  el área entera sería azul y la barra dejaría de distinguir un estado del otro.
+
+  El `itemIconTint` de los iconos también lo aplica: por eso los `fillColor`
+  de los vectores son neutros (`#e3e3e3`) y el tinte ocurre aquí. Un icono con
+  su color puesto en el drawable se libra del tinte y aparece del color
+  equivocado al no estar seleccionada.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:color="#2B6ED4"
+        android:state_checked="true"/>
+
+    <item
+        android:color="#8C8C8C"/>
+
+</selector>

@@ -31,6 +31,17 @@
 
     </LinearLayout>
 
+    <!--
+      Fase 0.1 · NO hay tira de área aquí.
+
+      Antes, bajo el encabezado, iba una banda con el nombre del área y un
+      "Cambiar". Se retiró de todas las pantallas a propósito: convertir el
+      cambio de área en algo que aparece en cada pantalla ensuciaba la interfaz
+      y quita sensación de aplicaciónterminada. El área se cambia ahora desde
+      Configuración y se elige una sola vez al entrar. Ver
+      `docs/FASE-0-SEPARACION-DE-MODOS.md`.
+    -->
+
     <!-- FILTROS DE PERIODO -->
 
     <HorizontalScrollView
@@ -299,9 +310,48 @@
 
             </LinearLayout>
 
+            <!-- AVISO PLAN GRATUITO (Fase 4) -->
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardUpgradeEstadisticas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:visibility="gone"
+                app:cardCornerRadius="18dp"
+                app:cardBackgroundColor="#FFF7DF"
+                app:cardElevation="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Gráficas disponibles en Premium"
+                        android:textColor="#7A5B00"
+                        android:textSize="15sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Con el plan Premium desbloqueas tus gráficas avanzadas de ingresos, facturas y métodos de pago. Actualiza en tu cuenta para verlas aquí."
+                        android:textColor="#7A5B00"
+                        android:textSize="13sp"/>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
             <!-- INGRESOS POR DÍA -->
 
             <androidx.cardview.widget.CardView
+                android:id="@+id/cardIngresosPorDia"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -323,7 +373,7 @@
                         android:textSize="12sp"
                         android:textStyle="bold"/>
 
-                    <com.example.totaldiaria.ui.graficas.GraficaLineas
+                    <com.example.totaldiaria.modulos.facturacion.ui.GraficaLineas
                         android:id="@+id/graficaLineas"
                         android:layout_width="match_parent"
                         android:layout_height="210dp"
@@ -347,6 +397,7 @@
             <!-- FACTURAS POR DÍA -->
 
             <androidx.cardview.widget.CardView
+                android:id="@+id/cardFacturasPorDia"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
@@ -368,7 +419,7 @@
                         android:textSize="12sp"
                         android:textStyle="bold"/>
 
-                    <com.example.totaldiaria.ui.graficas.GraficaBarras
+                    <com.example.totaldiaria.modulos.facturacion.ui.GraficaBarras
                         android:id="@+id/graficaBarras"
                         android:layout_width="match_parent"
                         android:layout_height="190dp"
@@ -414,7 +465,7 @@
                         android:textSize="12sp"
                         android:textStyle="bold"/>
 
-                    <com.example.totaldiaria.ui.graficas.GraficaDona
+                    <com.example.totaldiaria.modulos.facturacion.ui.GraficaDona
                         android:id="@+id/graficaDona"
                         android:layout_width="200dp"
                         android:layout_height="200dp"
@@ -468,7 +519,7 @@
                         android:textSize="12sp"
                         android:textStyle="bold"/>
 
-                    <com.example.totaldiaria.ui.graficas.GraficaBarrasHorizontales
+                    <com.example.totaldiaria.modulos.facturacion.ui.GraficaBarrasHorizontales
                         android:id="@+id/graficaComparacion"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -636,13 +687,11 @@
 
     </ScrollView>
 
-    <!-- MENU INFERIOR -->
-
+    <!-- BOTTOM NAV (cambio de rumbo pos-Fase 2: Estadísticas vuelve a ser pestaña) -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
         style="@style/MenuInferiorCompacto"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:menu="@menu/menu_bottom"/>
+        android:layout_height="wrap_content" />
 
 </LinearLayout>
