@@ -25,6 +25,12 @@ data class Factura(
     val servidorId: String? = null,
     val intentos: Int = 0,
     val ultimoError: String? = null,
+    /**
+     * El comprobante se sube DESPUÉS de que el servidor confirma la factura,
+     * porque hasta entonces no existe el id al que adjuntarlo. Esta bandera
+     * evita reenviarlo en cada pasada.
+     */
+    val comprobanteSubido: Boolean = false,
 )
 
 object EstadoSincronizacion {

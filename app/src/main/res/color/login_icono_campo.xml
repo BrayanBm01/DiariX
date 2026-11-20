@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+    Iconos de los campos del login: gris en reposo, verde DiariX al enfocar.
+    Archivo propio del login; el selector compartido no se modifica.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:color="@color/verde_pago"
+        android:state_focused="true" />
+    <item
+        android:color="@color/verde_pago"
+        android:state_hovered="true" />
+    <item android:color="@color/gris_etiqueta" />
+</selector>

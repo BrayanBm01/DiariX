@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Ajuste de la foto de perfil antes de guardarla (solo «Ver y editar perfil»).
+
+  El cuadrado grande es el recorte: lo que se ve DENTRO del círculo es
+  exactamente lo que se guarda. Los botones de zoom sirven para quien no use
+  el gesto de pellizco, y la miniatura inferior es la vista previa del
+  resultado final (se refresca al soltar el dedo o al usar los botones).
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="16dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="8dp">
+
+    <com.example.totaldiaria.core.cuenta.VistaRecorteCircular
+        android:id="@+id/vistaRecorteFoto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnZoomMenos"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:contentDescription="@string/perfil_foto_zoom_menos"
+            android:insetBottom="0dp"
+            android:insetTop="0dp"
+            android:text="@string/perfil_foto_zoom_menos"
+            android:textAllCaps="false"
+            android:textSize="14sp"
+            app:cornerRadius="14dp" />
+
+        <Space
+            android:layout_width="14dp"
+            android:layout_height="1dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnZoomMas"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:contentDescription="@string/perfil_foto_zoom_mas"
+            android:insetBottom="0dp"
+            android:insetTop="0dp"
+            android:text="@string/perfil_foto_zoom_mas"
+            android:textAllCaps="false"
+            android:textSize="14sp"
+            app:cornerRadius="14dp" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/imgVistaPreviaFoto"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="14dp"
+        android:contentDescription="@string/perfil_foto_vista_previa"
+        android:scaleType="fitCenter" />
+
+</LinearLayout>

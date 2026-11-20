@@ -9,6 +9,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.totaldiaria.R
+import com.example.totaldiaria.core.navegacion.exigirSesion
 import com.example.totaldiaria.modulos.facturacion.adaptador.FacturaAdapter
 import com.example.totaldiaria.modulos.facturacion.repositorio.FacturaRepository
 
@@ -16,6 +17,7 @@ class FacturasDelDiaActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!exigirSesion()) return
         setContentView(R.layout.activity_facturas_del_dia)
 
         window.statusBarColor =

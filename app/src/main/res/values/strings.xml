@@ -19,6 +19,11 @@
     <string name="selector_modo_titulo">¿Qué quieres gestionar?</string>
     <string name="cancelar">Cancelar</string>
 
+    <!-- Fase 4 · Acceso con Google (usuario individual). Texto del botón de
+         LoginActivity: vive aquí y no en el layout para que sea traducible y
+         único. El icono oficial lo aporta el drawable ic_google. -->
+    <string name="entrar_con_google">Entrar con Google</string>
+
     <!--
       DIARIX · Fase 0.1 · La pantalla de selección de área.
 
@@ -113,6 +118,20 @@
     <string name="perfil_cuenta_google">Cuenta de Google</string>
     <string name="perfil_correo_identidad">El correo identifica tu cuenta y por eso no se puede cambiar aquí.</string>
     <string name="perfil_sin_telefono">Sin teléfono</string>
+    <string name="perfil_foto">Foto de perfil</string>
+    <string name="perfil_cambiar_foto">Cambiar fotografía</string>
+    <string name="perfil_ajustar_foto_titulo">Ajustar fotografía</string>
+    <string name="perfil_foto_zoom_mas">Acercar</string>
+    <string name="perfil_foto_zoom_menos">Alejar</string>
+    <string name="perfil_foto_vista_previa">Vista previa del recorte</string>
+    <string name="perfil_foto_titulo">Foto de perfil</string>
+    <string name="perfil_foto_elegir">Elegir imagen</string>
+    <string name="perfil_foto_elegir_galeria">Desde la galería</string>
+    <string name="perfil_foto_guardar">Guardar</string>
+    <string name="perfil_foto_cancelar">Cancelar</string>
+    <string name="perfil_foto_usar_google">Usar foto de Google</string>
+    <string name="perfil_foto_guardada">Foto de perfil actualizada.</string>
+    <string name="perfil_foto_error">No se pudo guardar esa imagen. Prueba con otra.</string>
 
     <!-- Edición del perfil -->
     <string name="perfil_editar_titulo">Editar perfil</string>
@@ -151,12 +170,6 @@
     <string name="configuracion_rol_user">usuario</string>
 
     <string name="configuracion_sesion_con_rol">Activa en este dispositivo · %1$s</string>
-    <string name="configuracion_cerrar_todos">Cerrar sesión en todos los dispositivos</string>
-    <string name="configuracion_cerrar_todos_ayuda">Revoca el acceso también en los demás teléfonos donde entraste.</string>
-    <string name="configuracion_cerrar_todos_confirmacion">¿Cerrar sesión en todos los dispositivos?</string>
-    <string name="configuracion_cerrar_todos_confirmacion_detalle">Se cerrará la sesión en los demás teléfonos. En este seguirás dentro.</string>
-    <string name="configuracion_cerrar_todos_lista">Se cerraron %1$d sesión(es) en otros dispositivos.</string>
-    <string name="configuracion_cerrar_todos_error">No se pudieron cerrar las otras sesiones. Revisa tu conexión.</string>
 
     <!-- Comprobantes -->
     <string name="configuracion_qr">Código QR de los comprobantes</string>
@@ -231,4 +244,5 @@
     <string name="configuracion_cerrar_sesion_confirmacion">¿Quieres cerrar tu sesión?</string>
     <string name="configuracion_cerrar_sesion_detalle">Deberás iniciar sesión nuevamente para acceder a DiariX. Tus facturas locales se conservan en este dispositivo.</string>
     <string name="configuracion_cerrar_sesion_confirmar">Cerrar sesión</string>
+    <string name="configuracion_cerrar_sesion_error">No se pudo cerrar la sesión en el servidor. Revisa tu conexión e inténtalo de nuevo: tu sesión sigue abierta.</string>
 </resources>

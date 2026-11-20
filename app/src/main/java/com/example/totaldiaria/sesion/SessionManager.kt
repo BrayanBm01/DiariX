@@ -1,5 +1,6 @@
 package com.example.totaldiaria.sesion
 
+import com.example.totaldiaria.core.cuenta.CuentaLocal
 import com.example.totaldiaria.network.AuthApi
 import com.example.totaldiaria.network.CodigosDelBackend
 import com.example.totaldiaria.network.ErrorDiarix
@@ -17,7 +18,8 @@ import com.example.totaldiaria.network.UsuariosApi
  *  - Si falla por RED, NO se borra nada: la app sigue funcionando offline y
  *    reintenta cuando vuelva la conexión.
  *  - `cerrarSesion()` llama a `/auth/logout` (revoca el refresh en el
- *    servidor) y, pase lo que pase con la red, borra los tokens locales.
+ *    servidor) y solo borra los tokens locales si el servidor confirma el
+ *    cierre. Ante un fallo de red se mantiene la sesión y se avisa.
  *  - El backend es la autoridad: `recargarPerfil()` vuelve a leer
  *    `/auth/yo` para rol, empresa, conductor y plan.
  *
@@ -42,6 +44,18 @@ class SessionManager(
     var alExpiarSesion: (() -> Unit)? = null
 
     /**
+     * Avisa de que la identidad local cambió. Diarix reconstruye el
+     * sincronizador para que apunte a la base de la cuenta nueva; sin esto,
+     * una sesión anterior podría seguir subiendo filas con el token ajeno.
+     */
+    @Volatile
+    var alCambiarCuenta: ((String) -> Unit)? = null
+
+    /** Guarda la copia local de la foto de Google de la cuenta que entra. */
+    @Volatile
+    var alGuardarFotoGoogle: ((String) -> Unit)? = null
+
+    /**
      * DIARIX · Fase 0.1 · ¿Esta cuenta se abrió con Google?
      *
      * Sale de [TokensDeSesion.conGoogle], que es donde se guarda al iniciar
@@ -54,6 +68,12 @@ class SessionManager(
      */
     fun esCuentaDeGoogle(): Boolean =
         almacen.leer()?.conGoogle ?: false
+
+    /** Dueño persistido de los datos locales, o vacío si no hay sesión. */
+    fun dueñoLocal(): String = almacen.leer()?.ownerId.orEmpty()
+
+    /** URL de la foto de Google de la sesión guardada. */
+    fun fotoGoogleDeSesion(): String? = almacen.leer()?.fotoUrl
 
     /** Anticipación del refresh: se renueva cuando quedan menos de 60 s. */
     private val margenRefreshMs = 60_000L
@@ -73,8 +93,9 @@ class SessionManager(
         conGoogle = false,
     )
 
-    fun entrarConGoogle(idToken: String): PerfilActual =
-        completarLogin(authApi.loginGoogle(idToken), conGoogle = true)
+    /** Login con Google: `nonce` es el anti-replay generado por esta pantalla. */
+    fun entrarConGoogle(idToken: String, nonce: String? = null): PerfilActual =
+        completarLogin(authApi.loginGoogle(idToken, nonce), conGoogle = true)
 
     /**
      * Guarda los tokens y levanta el perfil desde /auth/yo.
@@ -88,19 +109,50 @@ class SessionManager(
         conGoogle: Boolean,
     ): PerfilActual {
 
+        // La identidad del dueño la da el SERVIDOR: primero `usuario.id`,
+        // después el `sub` firmado del JWT y, solo como último recurso, el
+        // correo que el propio servidor devolvió. Nunca se toma de Android.
+        val owner = resuelto.usuarioId
+            .ifBlank { JwtUtil.subDe(resuelto.tokens.accessToken) }
+            ?.takeIf { it.isNotBlank() }
+            ?: resuelto.email.takeIf { it.isNotBlank() }
+            ?: ""
+
         almacen.guardar(
-            resuelto.tokens.copy(conGoogle = conGoogle)
+            resuelto.tokens.copy(
+                conGoogle = conGoogle,
+                ownerId = owner,
+                fotoUrl = if (conGoogle) resuelto.fotoUrl else null,
+            )
         )
+
+        // Fijar la cuenta ANTES de que cualquier pantalla abra la base: así
+        // ningún repositorio creado en este instante puede leer la BD ajena.
+        CuentaLocal.fijar(owner)
+        alCambiarCuenta?.invoke(CuentaLocal.id())
 
         val perfil = try {
             authApi.yo(resuelto.tokens.accessToken)
         } catch (_: ErrorDiarix) {
             // El login ya fue 200; si /auth/yo falla por red no se bloquea la
             // entrada: se usa lo que trajo la respuesta del login.
-            perfilDesdeLogin(resuelto)
+            perfilDesdeLogin(resuelto, owner)
+        }
+
+        // /auth/yo manda: si confirma otro dueño, se corrige antes de pintar.
+        val confirmado = perfil.usuarioId.takeIf { it.isNotBlank() } ?: owner
+        if (confirmado != owner) {
+            almacen.leer()?.let { almacen.guardar(it.copy(ownerId = confirmado)) }
+            CuentaLocal.fijar(confirmado)
+            alCambiarCuenta?.invoke(CuentaLocal.id())
         }
 
         perfilActual = perfil
+
+        if (conGoogle) {
+            resuelto.fotoUrl?.let { alGuardarFotoGoogle?.invoke(it) }
+        }
+
         return perfil
     }
 
@@ -133,26 +185,78 @@ class SessionManager(
             throw e
         }
 
+        // Si el servidor dice que esta sesión pertenece a otra cuenta (p. ej.
+        // el token fue reemitido tras un cambio de cuenta), se corrige el
+        // dueño local ANTES de seguir mostrando datos.
+        val confirmado = perfil.usuarioId.takeIf { it.isNotBlank() }
+        if (confirmado != null && confirmado != CuentaLocal.ownerId) {
+            almacen.leer()?.let { almacen.guardar(it.copy(ownerId = confirmado)) }
+            CuentaLocal.fijar(confirmado)
+            alCambiarCuenta?.invoke(CuentaLocal.id())
+        }
+
         perfilActual = perfil
         return perfil
     }
 
-    /** Cierra sesión: revoca en el servidor y borra lo local SIEMPRE. */
+    /**
+     * Cierra sesión: PRIMERO revoca en el servidor, después borra lo local.
+     *
+     * `POST /auth/logout` exige un access token válido (`@ApiBearerAuth`): el
+     * refresh del cuerpo dice QUÉ sesión revocar y el access demuestra QUIÉN
+     * la revoca. Se pide un access listo (renovándolo si estaba por vencer) y
+     * se RELEE el almacén después: la renovación ROTA el refresh, y mandar el
+     * token anterior dejaría viva la sesión real en el servidor.
+     *
+     * Si el servidor no responde (red, timeout, 5xx) se lanza [ErrorDiarix] y
+     * NO se borra nada: la sesión local sigue abierta y la remota también, así
+     * que la app puede reintentar. Solo se limpia lo local cuando el servidor
+     * confirma el cierre o cuando responde que la sesión ya no existe
+     * ([CodigosDelBackend.NO_AUTENTICADO]): ahí no queda nada vivo que revocar.
+     */
     fun cerrarSesion() {
         val tokens = almacen.leer()
 
-        if (tokens != null) {
-            try {
-                // El endpoint solo necesita el refresh para revocar.
-                authApi.logout(accessToken = null, refreshToken = tokens.refreshToken)
-            } catch (_: ErrorDiarix) {
-                // Sin internet: se borra local de todos modos. La sesión del
-                // servidor caduca sola con el refresh de 30 días.
+        if (tokens == null) {
+            limpiarLocal()
+            return
+        }
+
+        val access = try {
+            tokensListos().accessToken
+        } catch (e: ErrorDiarix) {
+            if (e is ErrorDiarix.DeBackend && esExpiracionConfirmada(e)) {
+                // El servidor ya no reconoce la sesión: no hay nada remoto que
+                // revocar y conservar los tokens solo generaría un bucle.
+                limpiarLocal()
+                return
+            }
+
+            // Red/timeout/5xx: no se borra la sesión local.
+            throw e
+        }
+
+        // `tokensListos()` pudo renovar y guardar tokens nuevos.
+        val actuales = almacen.leer() ?: run {
+            limpiarLocal()
+            return
+        }
+
+        try {
+            authApi.logout(
+                accessToken = access,
+                refreshToken = actuales.refreshToken,
+            )
+        } catch (e: ErrorDiarix) {
+            if (e is ErrorDiarix.DeBackend && esExpiracionConfirmada(e)) {
+                // Ya estaba cerrada en el servidor: el objetivo se cumplió.
+            } else {
+                // Red/timeout/5xx: se mantiene la sesión para reintentar.
+                throw e
             }
         }
 
-        almacen.borrar()
-        perfilActual = null
+        limpiarLocal()
     }
 
     // =========================================================================
@@ -209,13 +313,6 @@ class SessionManager(
      * No borra la sesión local: el usuario sigue dentro de este dispositivo
      * hasta que cierre sesión o caduque el token. Es lo que el endpoint hace.
      */
-    fun cerrarSesionEnTodosLosDispositivos(): Int {
-        val api = usuariosApi
-            ?: throw ErrorDiarix.Inesperado("La sesión remota no está disponible.")
-
-        return api.cerrarSesionEnTodosLosDispositivos(tokensListos().accessToken)
-    }
-
     // =========================================================================
     // Interno
     // =========================================================================
@@ -252,10 +349,13 @@ class SessionManager(
             // El refresh rota los dos tokens y no dice nada de cómo se entró:
             // sin este `copy`, renovar la sesión borraría la marca de Google y
             // la etiqueta de Configuración desaparecería a los 50 minutos.
-            almacen.guardar(
-                renovados.tokens.copy(conGoogle = actuales.conGoogle)
+            val vigentes = renovados.tokens.copy(
+                conGoogle = actuales.conGoogle,
+                ownerId = actuales.ownerId,
+                fotoUrl = actuales.fotoUrl,
             )
-            renovados.tokens
+            almacen.guardar(vigentes)
+            vigentes
         } catch (e: ErrorDiarix) {
             if (esExpiracionConfirmada(e)) {
                 // El servidor dice que el refresh ya no es válido: sesión
@@ -268,23 +368,46 @@ class SessionManager(
         }
     }
 
-    /** Un refresh rechazado por el servidor con estos códigos significa que
-     *  la sesión ya no existe (360 a veces, 401 lo habitual). */
+    /**
+     * Un refresh rechazado por el servidor con estos códigos significa que
+     * la sesión ya no existe (360 a veces, 401 lo habitual), así que conservar
+     * los tokens solo produce un bucle de errores: LoginActivity los vería
+     * válidos (el refresh dura 30 días) y devolvería a la app rota una y otra
+     * vez. Aquí se borran y se avisa para volver al login.
+     *
+     * Incluye SESION_CERRADA_POR_INACTIVIDAD: es otro cierre CONFIRMADO por el
+     * servidor, no un fallo temporal. Un error de RED o un timeout NO entra
+     * aquí (es `ErrorDiarix.Red`, no `DeBackend`), y por eso una caída del
+     * backend o una mala conexión nunca cierra la sesión.
+     */
     private fun esExpiracionConfirmada(e: ErrorDiarix): Boolean =
         e is ErrorDiarix.DeBackend &&
             (e.codigo == CodigosDelBackend.NO_AUTENTICADO ||
-                e.codigo == CodigosDelBackend.CREDENCIALES_INVALIDAS)
+                e.codigo == CodigosDelBackend.CREDENCIALES_INVALIDAS ||
+                e.codigo == CodigosDelBackend.SESION_CERRADA_POR_INACTIVIDAD)
 
     /** Borra local, limpia el perfil y avisa para volver al login. */
     private fun expulsarPorExpiracion() {
-        almacen.borrar()
-        perfilActual = null
+        limpiarLocal()
         alExpiarSesion?.invoke()
     }
 
-    private fun perfilDesdeLogin(resuelto: LoginResuelto): PerfilActual =
+    /**
+     * Borra credenciales, perfil y el apuntador a la cuenta local. El
+     * sincronizador se reconstruye vacío mediante [alCambiarCuenta]: ningún
+     * hilo puede seguir usando la base de la cuenta anterior con un token
+     * nuevo.
+     */
+    private fun limpiarLocal() {
+        almacen.borrar()
+        perfilActual = null
+        CuentaLocal.limpiar()
+        alCambiarCuenta?.invoke(CuentaLocal.id())
+    }
+
+    private fun perfilDesdeLogin(resuelto: LoginResuelto, owner: String): PerfilActual =
         PerfilActual(
-            usuarioId = resuelto.email,
+            usuarioId = resuelto.usuarioId.ifBlank { owner }.ifBlank { resuelto.email },
             email = resuelto.email,
             nombre = resuelto.email,
             rol = resuelto.rol,

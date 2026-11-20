@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?><!-- Colores exclusivos del estado de error del login. -->
+<resources>
+    <color name="login_error_fondo">#FDECEC</color>
+    <color name="login_error_borde">#F3C7C7</color>
+</resources>

@@ -1,6 +1,7 @@
 package com.example.totaldiaria.modulos.facturacion.repositorio
 
 import androidx.test.core.app.ApplicationProvider
+import com.example.totaldiaria.core.cuenta.CuentaLocal
 import com.example.totaldiaria.modulos.facturacion.modelo.Factura
 import com.example.totaldiaria.modulos.facturacion.servicio.CierreDiarioService
 import com.example.totaldiaria.modulos.facturacion.servicio.DiaService
@@ -38,13 +39,15 @@ class FacturaRepositoryTest {
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
-        context.deleteDatabase("facturas.db")
+        CuentaLocal.limpiar()
+        context.deleteDatabase(CuentaLocal.nombreBase(CuentaLocal.id()))
         repos = FacturaRepository(context)
     }
 
     @After
     fun tearDown() {
-        context.deleteDatabase("facturas.db")
+        context.deleteDatabase(CuentaLocal.nombreBase(CuentaLocal.id()))
+        CuentaLocal.limpiar()
     }
 
     private fun factura(

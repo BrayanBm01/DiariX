@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import com.example.totaldiaria.modulos.facturacion.preferencias.QrManager
 import com.example.totaldiaria.modulos.facturacion.repositorio.DatabaseHelper
 import org.json.JSONArray
 import org.json.JSONObject
@@ -32,6 +33,7 @@ import java.util.zip.ZipOutputStream
 class RespaldoService(private val context: Context) {
 
     private val almacenComprobantes = ComprobanteStore(context)
+    private val qrManager = QrManager(context)
 
     // ------------------------------------------------------------------
     // Exportación
@@ -180,7 +182,7 @@ class RespaldoService(private val context: Context) {
 
     private fun copiarQrAlZip(zip: ZipOutputStream): Boolean {
 
-        val qr = File(context.filesDir, NOMBRE_QR)
+        val qr = qrManager.obtenerQr()
 
         if (!qr.exists()) return false
 
@@ -596,7 +598,7 @@ class RespaldoService(private val context: Context) {
         return try {
 
             origen.copyTo(
-                File(context.filesDir, NOMBRE_QR),
+                qrManager.obtenerQr(),
                 overwrite = true
             )
 

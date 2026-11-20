@@ -241,19 +241,19 @@ class BarraPrestamosTest {
     }
 
     @Test
-    fun `el menu de facturacion recupera sus cinco pestanas`() {
+    fun `el menu de facturacion recupera sus cinco pestanas con inicio al centro`() {
 
         // Esta es la comprobacion de no-rotura del cambio rápido: Facturación
-        // volvió a las cinco pestañas de siempre (Inicio, Registros,
-        // Estadísticas, Historial y Configuración) y Clientes ya no está en
-        // su barra. Si mañana alguien añade o quita una pestaña sin
+        // conserva sus cinco pestañas, ahora en el orden pedido (Historial,
+        // Registros, Inicio, Gráficas y Configuración), con Inicio en el
+        // centro. Si mañana alguien añade o quita una pestaña sin
         // actualizarlo, o cambia el orden, falla aquí y no en un dispositivo.
         assertEquals(
             listOf(
-                R.id.nav_inicio,
-                R.id.nav_registros,
-                R.id.nav_estadisticas,
                 R.id.nav_historial,
+                R.id.nav_registros,
+                R.id.nav_inicio,
+                R.id.nav_estadisticas,
                 R.id.nav_configuracion,
             ),
             itemsDelMenu(MenuDeModo.de(ModoDiarix.FACTURACION))

@@ -2,6 +2,7 @@ package com.example.totaldiaria.modulos.facturacion.sincronizacion
 
 import com.example.totaldiaria.modulos.facturacion.repositorio.FacturaRepository
 import com.example.totaldiaria.modulos.facturacion.modelo.Factura
+import com.example.totaldiaria.modulos.facturacion.servicio.AlmacenDeComprobantes
 import com.example.totaldiaria.network.CodigosDelBackend
 import com.example.totaldiaria.network.ErrorDiarix
 import com.example.totaldiaria.network.FacturasApi
@@ -17,6 +18,14 @@ interface RepositorioDeSincronizacion {
     fun obtenerPendientes(limite: Int): List<Factura>
     fun marcarSincronizada(idFactura: Int, servidorId: String): Boolean
     fun marcarRechazada(idFactura: Int, mensaje: String, intentos: Int): Boolean
+
+    /**
+     * Facturas ya sincronizadas con el comprobante pendiente. Los dobles de
+     * prueba que no prueban comprobantes pueden dejar los valores por defecto.
+     */
+    fun obtenerPendientesDeComprobante(limite: Int): List<Factura> = emptyList()
+    fun marcarComprobanteSubido(idFactura: Int): Boolean = true
+    fun marcarComprobanteFallido(idFactura: Int): Boolean = true
 }
 
 /** El repositorio real cumple el contrato de sincronización. */
@@ -31,6 +40,15 @@ class RepositorioSyncDeFacturas(
 
     override fun marcarRechazada(idFactura: Int, mensaje: String, intentos: Int): Boolean =
         base.marcarRechazada(idFactura, mensaje, intentos)
+
+    override fun obtenerPendientesDeComprobante(limite: Int): List<Factura> =
+        base.obtenerPendientesDeComprobante(limite)
+
+    override fun marcarComprobanteSubido(idFactura: Int): Boolean =
+        base.marcarComprobanteSubido(idFactura)
+
+    override fun marcarComprobanteFallido(idFactura: Int): Boolean =
+        base.marcarComprobanteFallido(idFactura)
 }
 
 /** Resultado de una pasada de sincronización para pintar la UI. */
@@ -65,6 +83,11 @@ class SincronizadorFacturas(
     private val red: EstadoDeRed,
     private val diaService: DiaService = DiaService(),
     private val tamanoDeLote: Int = 20,
+    /**
+     * Almacén local de comprobantes. Opcional para no romper los dobles de
+     * prueba existentes; en producción `Diarix` pasa el real.
+     */
+    private val comprobantes: AlmacenDeComprobantes? = null,
 ) {
 
     @Volatile
@@ -116,13 +139,69 @@ class SincronizadorFacturas(
         val tokens = sesion.tokensListos() // refresca si hace falta
 
         val pendientes = repositorio.obtenerPendientes(tamanoDeLote)
-        if (pendientes.isEmpty()) return ResultadoDeSync.SinPendientes
 
-        val respuesta =
-            facturasApi.sincronizar(tokens.accessToken, pendientes, diaService)
-        aplicarVeredictos(respuesta, pendientes)
+        var respuesta: RespuestaSincronizacion? = null
 
-        return ResultadoDeSync.Exito(respuesta.resumen)
+        if (pendientes.isNotEmpty()) {
+            respuesta =
+                facturasApi.sincronizar(tokens.accessToken, pendientes, diaService)
+            aplicarVeredictos(respuesta, pendientes)
+        }
+
+        // El comprobante necesita el id del servidor, así que va después.
+        // Puede haber comprobantes de pasadas anteriores aunque hoy no haya
+        // facturas nuevas: se reintentan siempre.
+        val comprobantesSubidos = subirComprobantesPendientes(tokens.accessToken)
+
+        return if (pendientes.isEmpty() && comprobantesSubidos == 0) {
+            ResultadoDeSync.SinPendientes
+        } else {
+            ResultadoDeSync.Exito(respuesta?.resumen)
+        }
+    }
+
+    /**
+     * Sube los comprobantes de facturas ya confirmadas.
+     *
+     * Un fallo de red corta la pasada (se reintenta al reconectar); un
+     * rechazo de negocio cuenta un intento y sigue con las demás, para que
+     * una foto corrupta no bloquee el resto.
+     */
+    private fun subirComprobantesPendientes(accessToken: String): Int {
+        val almacen = comprobantes ?: return 0
+
+        var subidos = 0
+
+        for (factura in repositorio.obtenerPendientesDeComprobante(10)) {
+            val servidorId = factura.servidorId ?: continue
+            val uri = factura.comprobanteUri ?: continue
+
+            val archivo = almacen.leerParaSubir(uri)
+
+            if (archivo == null) {
+                repositorio.marcarComprobanteFallido(factura.id)
+                continue
+            }
+
+            try {
+                facturasApi.adjuntarComprobante(
+                    accessToken = accessToken,
+                    facturaId = servidorId,
+                    nombre = archivo.nombre,
+                    mime = archivo.mime,
+                    archivo = archivo.bytes,
+                )
+
+                repositorio.marcarComprobanteSubido(factura.id)
+                subidos++
+            } catch (e: ErrorDiarix) {
+                repositorio.marcarComprobanteFallido(factura.id)
+
+                if (e is ErrorDiarix.Red) return subidos
+            }
+        }
+
+        return subidos
     }
 
     private fun clasificarError(e: ErrorDiarix): ResultadoDeSync =

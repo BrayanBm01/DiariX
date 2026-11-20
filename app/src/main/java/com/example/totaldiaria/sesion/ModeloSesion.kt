@@ -26,6 +26,10 @@ data class TokensDeSesion(
     val accessExpiraAtMs: Long,
     val refreshExpiraAtMs: Long,
     val conGoogle: Boolean = false,
+    /** Dueño de la base local. Viaja cifrado con los tokens, nunca en claro. */
+    val ownerId: String = "",
+    /** URL de la foto de Google, solo para poder refrescar la copia local. */
+    val fotoUrl: String? = null,
 )
 
 /** Datos que devuelve el login /auth/login y /auth/google. */
@@ -35,6 +39,10 @@ data class LoginResuelto(
     val email: String,
     val empresa: EmpresaSesion?,
     val cuentaNueva: Boolean,
+    /** `usuario.id` del backend: identidad real de la cuenta. */
+    val usuarioId: String = "",
+    /** Foto que Google envió en el login; el backend no la persiste. */
+    val fotoUrl: String? = null,
 )
 
 /** Empresa del contador o del conductor, tal como la manda el servidor. */

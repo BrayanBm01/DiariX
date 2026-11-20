@@ -92,9 +92,31 @@ open class FacturasApi(api: ApiCliente) {
         )
     }
 
+    /**
+     * Adjunta el comprobante a una factura ya sincronizada.
+     *
+     * Va DESPUÉS de `sincronizar` porque el backend necesita el id que asigna
+     * al confirmar la factura. El campo se llama `archivo`, igual que en
+     * `POST /facturas/:id/comprobante`.
+     */
+    open fun adjuntarComprobante(
+        accessToken: String,
+        facturaId: String,
+        nombre: String,
+        mime: String,
+        archivo: ByteArray,
+    ) {
+        api.postMultipart(
+            ruta = "/facturas/$facturaId/comprobante",
+            token = accessToken,
+            nombreArchivo = nombre,
+            mime = mime,
+            archivo = archivo,
+        )
+    }
+
     /** Uso del día contable actual, según el servidor (America/Bogota). */
-    open fun usoDiario(accessToken: String): UsoDiario {
-        val respuesta = api.getJson(RUTA_USO_DIARIO, token = accessToken)
+    open fun usoDiario(accessToken: String): UsoDiario {        val respuesta = api.getJson(RUTA_USO_DIARIO, token = accessToken)
         val json = JSONObject(respuesta)
 
         return UsoDiario(

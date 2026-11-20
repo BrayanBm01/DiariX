@@ -8,6 +8,7 @@ import com.example.totaldiaria.sesion.AuthApiFalsa
 import com.example.totaldiaria.sesion.SessionManager
 import com.example.totaldiaria.sesion.TokenStoreEnMemoria
 import com.example.totaldiaria.modulos.facturacion.servicio.DiaService
+import com.example.totaldiaria.modulos.facturacion.servicio.AlmacenDeComprobantes
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -41,13 +42,15 @@ class SincronizadorFacturasTest {
         api: FacturasApiFalsa,
         repositorio: RepositorioDeSyncFalso,
         red: EstadoDeRed = RedFalsa(),
-        sesion: SessionManager = sesionConTokensVigentes()
+        sesion: SessionManager = sesionConTokensVigentes(),
+        comprobantes: AlmacenDeComprobantes? = null,
     ) = SincronizadorFacturas(
         facturasApi = api,
         repositorio = repositorio,
         sesion = sesion,
         red = red,
         diaService = diaService,
+        comprobantes = comprobantes,
     )
 
     // ------------------------------------------------------------------
@@ -434,5 +437,105 @@ class SincronizadorFacturasTest {
 
         assertEquals(ResultadoDeSync.Omitido, segundo)
         assertEquals(1, api.lotesEnviados.size)
+    }
+
+    // ------------------------------------------------------------------
+    // Comprobantes: la foto se sube DESPUÉS de confirmar la factura
+    // ------------------------------------------------------------------
+
+    @Test
+    fun `el comprobante se sube al servidor tras confirmar la factura`() {
+        val api = FacturasApiFalsa()
+        api.respuesta = FacturasApiFalsa.respuestaCon(
+            Triple("uid-1", ResultadoDeSincronizacion.SINCRONIZADA, "fact_abc")
+        )
+
+        val almacen = AlmacenDeComprobantesFalso()
+
+        val repositorio = RepositorioDeSyncFalso(
+            listOf(
+                FacturasApiFalsa.factura(
+                    id = 1,
+                    comprobanteUri = "file:///comprobantes/foto.jpg",
+                )
+            )
+        )
+
+        val resultado = sincronizador(
+            api, repositorio, comprobantes = almacen
+        ).sincronizarPendientes()
+
+        assertTrue(resultado is ResultadoDeSync.Exito)
+        assertEquals(listOf("file:///comprobantes/foto.jpg"), almacen.leidos)
+        assertEquals(
+            listOf(
+                FacturasApiFalsa.ComprobanteEnviado(
+                    facturaId = "fact_abc",
+                    nombre = "comprobante.jpg",
+                    mime = "image/jpeg",
+                    bytes = 3,
+                )
+            ),
+            api.comprobantesEnviados
+        )
+        assertEquals(listOf(1), repositorio.comprobantesSubidos)
+        assertTrue(repositorio.filas.first().comprobanteSubido)
+    }
+
+    @Test
+    fun `si la subida falla la factura sigue confirmada y se reintenta`() {
+        val api = FacturasApiFalsa()
+        api.respuesta = FacturasApiFalsa.respuestaCon(
+            Triple("uid-1", ResultadoDeSincronizacion.SINCRONIZADA, "fact_abc")
+        )
+        api.errorAlAdjuntar = ErrorDiarix.Red("sin red")
+
+        val repositorio = RepositorioDeSyncFalso(
+            listOf(
+                FacturasApiFalsa.factura(
+                    id = 1,
+                    comprobanteUri = "file:///comprobantes/foto.jpg",
+                )
+            )
+        )
+
+        val resultado = sincronizador(
+            api, repositorio, comprobantes = AlmacenDeComprobantesFalso()
+        ).sincronizarPendientes()
+
+        assertTrue(resultado is ResultadoDeSync.Exito)
+
+        val fila = repositorio.filas.first()
+
+        // La factura NO se pierde ni vuelve a PENDIENTE por culpa de la foto.
+        assertEquals(EstadoSincronizacion.SINCRONIZADA, fila.estadoSincronizacion)
+        assertEquals("fact_abc", fila.servidorId)
+        assertEquals(false, fila.comprobanteSubido)
+        assertEquals(listOf(1), repositorio.comprobantesFallidos)
+    }
+
+    @Test
+    fun `un comprobante pendiente de una pasada anterior se sube sin facturas nuevas`() {
+        val api = FacturasApiFalsa()
+
+        val repositorio = RepositorioDeSyncFalso(
+            listOf(
+                FacturasApiFalsa.factura(
+                    id = 7,
+                    estado = EstadoSincronizacion.SINCRONIZADA,
+                    servidorId = "fact_7",
+                    comprobanteUri = "file:///comprobantes/pendiente.jpg",
+                )
+            )
+        )
+
+        val resultado = sincronizador(
+            api, repositorio, comprobantes = AlmacenDeComprobantesFalso()
+        ).sincronizarPendientes()
+
+        assertTrue(resultado is ResultadoDeSync.Exito)
+        assertTrue(api.lotesEnviados.isEmpty())
+        assertEquals("fact_7", api.comprobantesEnviados.single().facturaId)
+        assertTrue(repositorio.filas.first().comprobanteSubido)
     }
 }

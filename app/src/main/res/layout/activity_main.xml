@@ -28,15 +28,51 @@
             android:scaleType="fitStart"
             android:src="@drawable/diarix_logotipo" />
 
-        <ImageView
-            android:id="@+id/imgQr"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            android:padding="10dp"
-            android:background="@drawable/bg_circle_qr"
-            android:src="@drawable/ic_qr"
-            android:contentDescription="QR"
-            app:tint="#FFFFFF"/>
+        <!--
+          La campanita, en el sitio que antes ocupaba el QR.
+
+          El QR se movió DENTRO de la tarjeta del total: ahí pertenece (es el
+          código que se muestra al cliente) y comparte tarjeta con el monto en
+          vez de competir en el encabezado con el logotipo. En el encabezado
+          queda solo el acceso a las notificaciones, con su indicador de
+          pendientes superpuesto.
+        -->
+        <FrameLayout
+            android:id="@+id/btnNotificaciones"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:contentDescription="Notificaciones"
+            android:focusable="true">
+
+            <ImageView
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no"
+                android:padding="10dp"
+                android:src="@drawable/ic_campana"
+                app:tint="#5A6182"/>
+
+            <TextView
+                android:id="@+id/txtBadgeNotificaciones"
+                android:layout_width="wrap_content"
+                android:layout_height="18dp"
+                android:layout_gravity="top|end"
+                android:background="@drawable/bg_badge"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:minWidth="18dp"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:visibility="gone"/>
+
+        </FrameLayout>
 
     </LinearLayout>
 
@@ -71,44 +107,74 @@
                 app:cardCornerRadius="20dp"
                 app:cardElevation="2dp">
 
+                <!--
+                  Monto a la izquierda y QR en la esquina superior derecha, en
+                  la MISMA tarjeta. El QR mide 48dp (objetivo táctil mínimo) y
+                  queda alineado con el padding interno de la tarjeta; el
+                  bloque de texto ocupa el resto con `layout_weight`, así que
+                  el monto nunca queda debajo del QR ni se recorta en pantallas
+                  pequeñas.
+                -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
+                    android:gravity="top"
+                    android:orientation="horizontal"
                     android:padding="20dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="TOTAL DEL DÍA"
-                        android:textColor="#7A7A9D"
-                        android:textStyle="bold"/>
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/txtTotal"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="$0"
-                        android:textColor="#0AA87A"
-                        android:textSize="34sp"
-                        android:textStyle="bold"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="TOTAL DEL DÍA"
+                            android:textColor="#7A7A9D"
+                            android:textStyle="bold"/>
 
-                    <TextView
-                        android:id="@+id/txtCantidad"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0 facturas"
-                        android:textColor="#7A7A9D"/>
+                        <TextView
+                            android:id="@+id/txtTotal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="$0"
+                            android:textColor="#0AA87A"
+                            android:textSize="34sp"
+                            android:textStyle="bold"/>
 
-                    <!-- Fase 4 · estado de sincronización (online/offline/pendientes) -->
-                    <TextView
-                        android:id="@+id/txtEstadoSync"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:textColor="#7A7A9D"
-                        android:textSize="13sp"
-                        android:visibility="gone"/>
+                        <TextView
+                            android:id="@+id/txtCantidad"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 facturas"
+                            android:textColor="#7A7A9D"/>
+
+                        <!-- Fase 4 · estado de sincronización (online/offline/pendientes) -->
+                        <TextView
+                            android:id="@+id/txtEstadoSync"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:textColor="#7A7A9D"
+                            android:textSize="13sp"
+                            android:visibility="gone"/>
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/imgQr"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="12dp"
+                        android:background="@drawable/bg_circle_qr"
+                        android:clickable="true"
+                        android:contentDescription="QR"
+                        android:focusable="true"
+                        android:padding="12dp"
+                        android:src="@drawable/ic_qr"
+                        app:tint="#FFFFFF"/>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

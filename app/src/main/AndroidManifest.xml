@@ -43,6 +43,16 @@
 
         </activity>
 
+        <!--
+          Bandeja de notificaciones propias. Se abre desde la campanita de
+          Inicio y NO es una pestaña del menú inferior: no compite con las
+          cinco secciones ni necesita un quinto lugar.
+        -->
+        <activity
+            android:name=".modulos.notificaciones.ui.NotificacionesActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

@@ -2,6 +2,7 @@ package com.example.totaldiaria.sesion
 
 import com.example.totaldiaria.network.ApiCliente
 import com.example.totaldiaria.network.AuthApi
+import com.example.totaldiaria.network.CodigosDelBackend
 import com.example.totaldiaria.network.ErrorDiarix
 import com.example.totaldiaria.network.UsuariosApi
 import org.junit.Assert.assertEquals
@@ -71,6 +72,83 @@ class PerfilEnSesionTest {
             "La marca de Google es de esta sesión: cerrarla debe borrarla",
             manager.esCuentaDeGoogle()
         )
+    }
+
+    /**
+     * El logout manda el refresh VIVO, no el que había antes de renovar.
+     *
+     * `tokensListos()` puede rotar el par justo antes de cerrar. Si se mandara
+     * el refresh anterior, el servidor no revocaría la sesión real y quedaría
+     * una sesión abandonada durante 30 días.
+     */
+    @Test
+    fun `cerrar sesion usa el refresh rotado y no el viejo`() {
+
+        val api = AuthApiConGoogle()
+        val manager = SessionManager(api, TokenStoreEnMemoria())
+
+        manager.entrarConGoogle("id-token")
+
+        manager.cerrarSesion()
+
+        assertEquals(
+            "Debe revocarse el refresh emitido por la última renovación",
+            "refresh-renovado-refresh-id-token",
+            api.ultimoRefreshCerrado,
+        )
+        assertEquals("access-renovado-refresh-id-token", api.ultimoAccessCerrado)
+    }
+
+    /**
+     * Si el servidor no responde, la sesión LOCAL se conserva.
+     *
+     * Borrar los tokens con la sesión remota viva deja una sesión abandonada
+     * en el servidor y hace creer al usuario que cerró cuando no lo hizo.
+     */
+    @Test
+    fun `si el servidor no responde al cerrar sesion la sesion local se conserva`() {
+
+        val api = AuthApiConGoogle(
+            falloAlCerrar = ErrorDiarix.Red("timeout de prueba")
+        )
+        val manager = SessionManager(api, TokenStoreEnMemoria())
+
+        manager.entrarConGoogle("id-token")
+
+        val fallo = try {
+            manager.cerrarSesion()
+            null
+        } catch (e: ErrorDiarix) {
+            e
+        }
+
+        assertTrue("Un fallo de red debe propagarse", fallo is ErrorDiarix.Red)
+        assertTrue(
+            "Sin confirmación del servidor no se borra la sesión local",
+            manager.tieneSesion(),
+        )
+    }
+
+    /**
+     * Si el servidor ya dio la sesión por cerrada, limpiar lo local es seguro:
+     * no queda nada vivo que revocar.
+     */
+    @Test
+    fun `si el servidor dice que la sesion ya no existe se limpia lo local`() {
+
+        val api = AuthApiConGoogle(
+            falloAlCerrar = ErrorDiarix.DeBackend(
+                CodigosDelBackend.NO_AUTENTICADO,
+                "La sesión se cerró.",
+            )
+        )
+        val manager = SessionManager(api, TokenStoreEnMemoria())
+
+        manager.entrarConGoogle("id-token")
+
+        manager.cerrarSesion()
+
+        assertFalse(manager.tieneSesion())
     }
 
     /**
@@ -195,7 +273,6 @@ class PerfilEnSesionTest {
         listOf(
             { manager.miPerfil() },
             { manager.actualizarMiPerfil("Ana", null) },
-            { manager.cerrarSesionEnTodosLosDispositivos() },
         ).forEach { accion ->
 
             val fallo = try {
@@ -226,9 +303,14 @@ class PerfilEnSesionTest {
     )
 
     /** AuthApi que sabe entrar por Google y responde a `/auth/yo`. */
-    private class AuthApiConGoogle : AuthApi(ApiCliente("http://localhost:0/api/v1")) {
+    private class AuthApiConGoogle(
+        private val falloAlCerrar: ErrorDiarix? = null,
+    ) : AuthApi(ApiCliente("http://localhost:0/api/v1")) {
 
-        override fun loginGoogle(idToken: String): LoginResuelto =
+        var ultimoAccessCerrado: String? = null
+        var ultimoRefreshCerrado: String? = null
+
+        override fun loginGoogle(idToken: String, nonce: String?): LoginResuelto =
             LoginResuelto(
                 tokens = tokens(idToken),
                 rol = "USER",
@@ -273,7 +355,11 @@ class PerfilEnSesionTest {
                 plan = null,
             )
 
-        override fun logout(accessToken: String?, refreshToken: String?) = Unit
+        override fun logout(accessToken: String?, refreshToken: String?) {
+            ultimoAccessCerrado = accessToken
+            ultimoRefreshCerrado = refreshToken
+            falloAlCerrar?.let { throw it }
+        }
 
         private fun tokens(sufijo: String) = TokensDeSesion(
             accessToken = "access-$sufijo",
@@ -315,7 +401,5 @@ class PerfilEnSesionTest {
 
             return miPerfil(accessToken)
         }
-
-        override fun cerrarSesionEnTodosLosDispositivos(accessToken: String): Int = 2
     }
 }

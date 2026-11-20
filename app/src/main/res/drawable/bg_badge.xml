@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Indicador de notificaciones sin leer.
+
+  Es un óvalo sólido y no una imagen: el número lo pone la pantalla encima, y
+  un drawable con texto dentro obligaría a crear uno por cada cantidad. El
+  rojo es el de error de la app (#D93A3A), el mismo que usan los avisos, para
+  que el punto no introduzca un color nuevo en la paleta.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <solid android:color="#D93A3A"/>
+
+    <corners android:radius="100dp"/>
+
+</shape>

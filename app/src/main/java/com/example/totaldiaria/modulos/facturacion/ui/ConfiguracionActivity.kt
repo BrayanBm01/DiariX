@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,12 +18,15 @@ import com.example.totaldiaria.Diarix
 import com.example.totaldiaria.LoginActivity
 import com.example.totaldiaria.R
 import com.example.totaldiaria.core.cuenta.AcercaDeActivity
+import com.example.totaldiaria.core.cuenta.FotoCircular
+import com.example.totaldiaria.core.cuenta.FotoPerfilStore
 import com.example.totaldiaria.core.cuenta.AyudaActivity
 import com.example.totaldiaria.core.cuenta.EditarPerfilActivity
 import com.example.totaldiaria.core.modo.ModoDiarix
 import com.example.totaldiaria.core.modo.SelectorDeModo
 import com.example.totaldiaria.core.modo.modoVigente
 import com.example.totaldiaria.core.navegacion.BottomNavigator
+import com.example.totaldiaria.core.navegacion.exigirSesion
 import com.example.totaldiaria.modulos.facturacion.preferencias.QrManager
 import com.example.totaldiaria.modulos.facturacion.servicio.RespaldoService
 import com.example.totaldiaria.network.ErrorDiarix
@@ -83,6 +87,8 @@ class ConfiguracionActivity : AppCompatActivity() {
     private lateinit var qrManager: QrManager
     private lateinit var respaldoService: RespaldoService
 
+    private lateinit var imgFotoPerfil: ImageView
+    private lateinit var fotoStore: FotoPerfilStore
     private lateinit var txtIniciales: TextView
     private lateinit var txtNombrePerfil: TextView
     private lateinit var txtCorreoPerfil: TextView
@@ -142,6 +148,8 @@ class ConfiguracionActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
+        if (!exigirSesion()) return
+
         setContentView(R.layout.activity_configuracion)
 
         window.statusBarColor =
@@ -150,11 +158,12 @@ class ConfiguracionActivity : AppCompatActivity() {
         WindowInsetsControllerCompat(window, window.decorView)
             .isAppearanceLightStatusBars = true
 
-        Diarix.iniciar(this)
-
         qrManager = QrManager(this)
 
         respaldoService = RespaldoService(this)
+
+        imgFotoPerfil = findViewById(R.id.imgFotoPerfil)
+        fotoStore = FotoPerfilStore(this)
 
         txtIniciales = findViewById(R.id.txtIniciales)
         txtNombrePerfil = findViewById(R.id.txtNombrePerfil)
@@ -172,6 +181,8 @@ class ConfiguracionActivity : AppCompatActivity() {
         mostrarSesion()
         mostrarVersion()
         pintarPerfilDesdeLaSesion()
+        pintarFoto()
+        sincronizarFotoDeGoogle()
 
         // ------------------------------------------------------------------
         // PERFIL
@@ -187,10 +198,6 @@ class ConfiguracionActivity : AppCompatActivity() {
 
         findViewById<View>(R.id.filaModo).setOnClickListener {
             SelectorDeModo.mostrarComoDialogo(this)
-        }
-
-        findViewById<View>(R.id.filaCerrarSesionTodos).setOnClickListener {
-            pedirConfirmacionCerrarSesionTodos()
         }
 
         // ------------------------------------------------------------------
@@ -236,6 +243,7 @@ class ConfiguracionActivity : AppCompatActivity() {
         super.onResume()
         BottomNavigator.sincronizarPestana(this, R.id.nav_configuracion)
         mostrarEstadoQr(qrManager.existeQr())
+        pintarFoto()
         pedirPerfilSiFalta()
     }
 
@@ -328,6 +336,56 @@ class ConfiguracionActivity : AppCompatActivity() {
         etiquetaGoogle.visibility =
             if (Diarix.sesion.esCuentaDeGoogle()) View.VISIBLE
             else View.GONE
+
+        pintarFoto()
+    }
+
+    // =======================================================================
+    // Foto de perfil
+    // =======================================================================
+
+    /**
+     * Solo MUESTRA la foto de ESTA cuenta, ya circular; si no tiene, deja ver
+     * las iniciales. Elegir, ajustar y guardar se hace en «Ver y editar perfil».
+     */
+    private fun pintarFoto() {
+        val archivo = fotoStore.fotoActual()
+        // El ImageView es `match_parent` dentro del FrameLayout.
+        val lado = resources.getDimensionPixelSize(R.dimen.avatar_configuracion_tamano)
+
+        val original = archivo?.takeIf { it.exists() }?.let {
+            runCatching { FotoCircular.decodificar(it) }.getOrNull()
+        }
+        val circular = FotoCircular.recortarCircular(original, lado)
+
+        if (circular == null) {
+            imgFotoPerfil.setImageBitmap(null)
+            imgFotoPerfil.visibility = View.GONE
+            txtIniciales.visibility = View.VISIBLE
+            return
+        }
+
+        imgFotoPerfil.setImageBitmap(circular)
+        imgFotoPerfil.visibility = View.VISIBLE
+        txtIniciales.visibility = View.GONE
+    }
+
+    /**
+     * La foto de Google no la guarda el backend: viene en la respuesta del
+     * login. Se copia una vez al almacenamiento privado de la cuenta para que
+     * siga ahí tras cerrar y volver a entrar.
+     */
+    private fun sincronizarFotoDeGoogle() {
+        val url = Diarix.sesion.fotoGoogleDeSesion() ?: fotoStore.urlGoogle()
+
+        if (url == null || fotoStore.tieneFotoGoogle()) return
+
+        Diarix.enHiloDeFondo {
+            val descargada = runCatching { fotoStore.descargarGoogle(url) }
+                .getOrDefault(false)
+
+            if (descargada) runOnUiThread { pintarFoto() }
+        }
     }
 
     // =======================================================================
@@ -403,55 +461,6 @@ class ConfiguracionActivity : AppCompatActivity() {
         return getString(recurso)
     }
 
-    /**
-     * Confirmar antes de revocar las otras sesiones.
-     *
-     * Avisa de lo que va a pasar y de lo que NO va a pasar (este dispositivo
-     * sigue dentro), porque quien toca esto desde un teléfono que ha perdido
-     * otro está resolviendo un susto y necesita saber si va a perder también el
-     * acceso desde aquí.
-     */
-    private fun pedirConfirmacionCerrarSesionTodos() {
-
-        AlertDialog.Builder(this)
-            .setTitle(R.string.configuracion_cerrar_todos)
-            .setMessage(R.string.configuracion_cerrar_todos_confirmacion_detalle)
-            .setPositiveButton(R.string.confirmar) { _, _ ->
-                ejecutarCerrarSesionEnTodos()
-            }
-            .setNegativeButton(R.string.cancelar, null)
-            .show()
-    }
-
-    private fun ejecutarCerrarSesionEnTodos() {
-
-        Diarix.enHiloDeFondo {
-
-            try {
-
-                val cerradas = Diarix.sesion.cerrarSesionEnTodosLosDispositivos()
-
-                runOnUiThread {
-                    Toast.makeText(
-                        this,
-                        getString(R.string.configuracion_cerrar_todos_lista, cerradas),
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-
-            } catch (_: ErrorDiarix) {
-
-                runOnUiThread {
-                    Toast.makeText(
-                        this,
-                        R.string.configuracion_cerrar_todos_error,
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            }
-        }
-    }
-
     // =======================================================================
     // Cerrar sesión
     // =======================================================================
@@ -478,26 +487,47 @@ class ConfiguracionActivity : AppCompatActivity() {
 
     /**
      * Fase 4 · Cierre de sesión: llama a /auth/logout (revoca el refresh en
-     * el servidor) y, pase lo que pase con la red, borra los tokens locales
-     * y vuelve al login.
+     * el servidor) y solo vuelve al login cuando el servidor confirma.
+     *
+     * Si la red falla, `cerrarSesion()` lanza y aquí se avisa: NO se borran
+     * los tokens, no se muestra un cierre que no ocurrió y la sesión sigue
+     * disponible para reintentar. Dejar la sesión local viva con la remota
+     * viva es coherente; borrar solo la local dejaría una sesión abandonada
+     * en el servidor sin que nadie lo sepa.
      */
     private fun ejecutarCierreDeSesion() {
 
         Diarix.enHiloDeFondo {
-            // Server + local, incluso sin internet (borra local igual).
-            Diarix.sesion.cerrarSesion()
+            try {
+                Diarix.sesion.cerrarSesion()
 
-            runOnUiThread {
-                val intent =
-                    Intent(this, LoginActivity::class.java).apply {
-                        addFlags(
-                            Intent.FLAG_ACTIVITY_NEW_TASK or
-                                Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        )
-                    }
-                startActivity(intent)
+                runOnUiThread { volverAlLogin() }
+            } catch (_: ErrorDiarix) {
+                runOnUiThread {
+                    Toast.makeText(
+                        this,
+                        R.string.configuracion_cerrar_sesion_error,
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             }
         }
+    }
+
+    /**
+     * Vuelve al login limpiando la pila: después de cerrar sesión, el botón
+     * "atrás" no puede devolver a una pantalla privada.
+     */
+    private fun volverAlLogin() {
+
+        val intent =
+            Intent(this, LoginActivity::class.java).apply {
+                addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK or
+                        Intent.FLAG_ACTIVITY_CLEAR_TASK
+                )
+            }
+        startActivity(intent)
     }
 
     // =======================================================================

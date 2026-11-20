@@ -249,6 +249,73 @@ class SessionManagerTest {
         )
     }
 
+    @Test
+    fun `una sesion cerrada por inactividad por el servidor borra la sesion y avisa`() {
+        val almacen = almacenConSesionVigente()
+        val api = AuthApiFalsa({ ahora })
+        val m = manager(almacen, api)
+
+        var expiraciones = 0
+        m.alExpiarSesion = { expiraciones++ }
+
+        // El backend confirmó que la sesión ya no existe (401 con código
+        // propio). Conservar los tokens dejaría a la persona atrapada: el
+        // login la mandaría de vuelta a la app rota porque el refresh dura 30
+        // días y `tieneSesion()` seguiría en true.
+        api.refreshRechazado = true
+        api.codigoDeRechazo = CodigosDelBackend.SESION_CERRADA_POR_INACTIVIDAD
+        ahora = inicio + duracionAccess - 30_000L
+
+        var fallo: ErrorDiarix? = null
+
+        try {
+            m.tokensListos()
+        } catch (e: ErrorDiarix) {
+            fallo = e
+        }
+
+        assertEquals(
+            CodigosDelBackend.SESION_CERRADA_POR_INACTIVIDAD,
+            (fallo as? ErrorDiarix.DeBackend)?.codigo
+        )
+        assertNull(almacen.tokens)
+        assertEquals(1, expiraciones)
+        assertFalse(m.tieneSesion())
+    }
+
+    @Test
+    fun `un rechazo temporal del servidor no borra la sesion`() {
+        val almacen = almacenConSesionVigente()
+        val api = AuthApiFalsa({ ahora })
+        val m = manager(almacen, api)
+
+        var expiraciones = 0
+        m.alExpiarSesion = { expiraciones++ }
+
+        // 429 por limitador o un 503: el servidor respondió, pero NO dice que
+        // la sesión esté muerta. Offline primero: se conservan los tokens y se
+        // reintenta más tarde.
+        api.refreshRechazado = true
+        api.codigoDeRechazo = CodigosDelBackend.LIMITE_EXCEDIDO
+        ahora = inicio + duracionAccess - 30_000L
+
+        var fallo: ErrorDiarix? = null
+
+        try {
+            m.tokensListos()
+        } catch (e: ErrorDiarix) {
+            fallo = e
+        }
+
+        assertEquals(
+            CodigosDelBackend.LIMITE_EXCEDIDO,
+            (fallo as? ErrorDiarix.DeBackend)?.codigo
+        )
+        assertNotNull(almacen.tokens)
+        assertEquals(0, expiraciones)
+        assertTrue(m.tieneSesion())
+    }
+
     // ------------------------------------------------------------------
     // Cierre de sesión
     // ------------------------------------------------------------------
@@ -274,18 +341,81 @@ class SessionManagerTest {
     }
 
     @Test
-    fun `cerrar sesion sin internet borra lo local igualmente`() {
+    fun `cerrar sesion envia el access token al servidor`() {
         val almacen = almacenConSesionVigente()
         val api = AuthApiFalsa({ ahora })
         val m = manager(almacen, api)
 
-        api.refreshFallaPorRed = true
-
-        // No debe lanzar: el cierre local es la prioridad.
         m.cerrarSesion()
 
-        assertEquals(1, api.logoutCalls.get())
+        // /auth/logout exige Bearer: sin access el servidor responde 401 y la
+        // sesión quedaba viva allá con los tokens ya borrados aquí.
+        assertEquals("access-0", api.ultimoLogoutAccess)
+        assertEquals("refresh-0", api.ultimoLogoutRefresh)
+    }
+
+    @Test
+    fun `cerrar sesion renueva el access vencido antes de revocar`() {
+        val almacen = almacenConSesionVigente()
+        val api = AuthApiFalsa({ ahora })
+        val m = manager(almacen, api)
+
+        // El access venció hace un rato: con el refresh vigente hay sesión y
+        // el logout puede conseguir un access fresco para poder revocar.
+        ahora = inicio + duracionAccess + 5_000L
+
+        m.cerrarSesion()
+
+        assertEquals(1, api.refreshCalls.get())
+        assertEquals("access-1", api.ultimoLogoutAccess)
         assertNull(almacen.tokens)
+    }
+
+    @Test
+    fun `cerrar sesion sin internet NO borra lo local`() {
+        val almacen = almacenConSesionVigente()
+        val api = AuthApiFalsa({ ahora })
+        val m = manager(almacen, api)
+
+        api.logoutFallaPorRed = true
+
+        var fallo: ErrorDiarix? = null
+        try {
+            m.cerrarSesion()
+        } catch (e: ErrorDiarix) {
+            fallo = e
+        }
+
+        // La sesión local se conserva junto con la remota: borrarla solo aquí
+        // dejaría una sesión viva en el servidor y un usuario que cree que ya
+        // cerró. Se avisa y se reintentará.
+        assertTrue(fallo is ErrorDiarix.Red)
+        assertEquals(1, api.logoutCalls.get())
+        assertNotNull(almacen.tokens)
+        assertTrue(m.tieneSesion())
+    }
+
+    @Test
+    fun `si la renovacion previa al cierre falla por red no se borra lo local`() {
+        val almacen = almacenConSesionVigente()
+        val api = AuthApiFalsa({ ahora })
+        val m = manager(almacen, api)
+
+        // El access venció hace 5 s: cerrar exige renovar primero, y la red
+        // no acompaña. Tampoco aquí se pierde la sesión.
+        api.refreshFallaPorRed = true
+        ahora = inicio + duracionAccess + 5_000L
+
+        var fallo: ErrorDiarix? = null
+        try {
+            m.cerrarSesion()
+        } catch (e: ErrorDiarix) {
+            fallo = e
+        }
+
+        assertTrue(fallo is ErrorDiarix.Red)
+        assertEquals(0, api.logoutCalls.get())
+        assertNotNull(almacen.tokens)
     }
 
     // ------------------------------------------------------------------

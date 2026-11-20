@@ -84,9 +84,131 @@
                 style="@style/TituloDeSeccion"
                 android:text="@string/configuracion_seccion_perfil" />
 
+            <!--
+              FOTO DE PERFIL (solo aquí, no en Configuración).
+
+              El avatar es un círculo REAL: `FotoCircular` recorta las esquinas
+              con transparencia antes de pintar el bitmap, y `VistaRecorteCircular`
+              hace lo mismo en el ajuste. Las iniciales siguen siendo el fondo
+              cuando esta cuenta aún no tiene imagen.
+            -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:paddingStart="20dp"
+                    android:paddingTop="22dp"
+                    android:paddingEnd="20dp"
+                    android:paddingBottom="8dp">
+
+                    <FrameLayout
+                        android:layout_width="@dimen/avatar_perfil_tamano"
+                        android:layout_height="@dimen/avatar_perfil_tamano">
+
+                        <TextView
+                            android:id="@+id/txtInicialesPerfil"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/bg_avatar"
+                            android:gravity="center"
+                            android:text="@string/perfil_inicial_vacio"
+                            android:textColor="#0AA87A"
+                            android:textSize="34sp"
+                            android:textStyle="bold" />
+
+                        <ImageView
+                            android:id="@+id/imgAvatarPerfil"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="@string/perfil_foto"
+                            android:scaleType="fitCenter"
+                            android:visibility="gone" />
+
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:id="@+id/filaCambiarFoto"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="18dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/perfil_cambiar_foto"
+                            android:textColor="#2B6ED4"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:text="@string/perfil_foto_elegir_galeria"
+                            android:textColor="@color/gris_etiqueta"
+                            android:textSize="12sp" />
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:contentDescription="@string/perfil_cambiar_foto"
+                            android:src="@drawable/ic_chevron"
+                            app:tint="#8C8C8C" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/filaUsarFotoGoogle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/perfil_foto_usar_google"
+                            android:textColor="#2B6ED4"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:contentDescription="@string/perfil_foto_usar_google"
+                            android:src="@drawable/ic_chevron"
+                            app:tint="#8C8C8C" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
                 app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="20dp"
                 app:cardElevation="2dp">

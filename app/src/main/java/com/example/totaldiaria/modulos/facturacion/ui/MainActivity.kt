@@ -2,6 +2,8 @@ package com.example.totaldiaria.modulos.facturacion.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -31,6 +33,7 @@ import com.example.totaldiaria.modulos.facturacion.ui.ComprobanteController
 import com.example.totaldiaria.modulos.facturacion.ui.FormatoMoneda
 import com.example.totaldiaria.modulos.facturacion.ui.MonedaTextWatcher
 import com.example.totaldiaria.modulos.facturacion.ui.QrDialog
+import com.example.totaldiaria.modulos.notificaciones.ui.NotificacionesActivity
 import com.example.totaldiaria.network.ErrorDiarix
 
 class MainActivity : AppCompatActivity() {
@@ -55,6 +58,37 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnTransferencia: Button
     private lateinit var btnAmbos: Button
     private lateinit var btnGuardar: Button
+
+    /** Campanita del encabezado (notificaciones propias de la app). */
+    private lateinit var btnNotificaciones: View
+    private lateinit var txtBadgeNotificaciones: TextView
+
+    private val relojCampanita = Handler(Looper.getMainLooper())
+
+    /** Evita lanzar dos resúmenes a la vez si uno tarda más de lo normal. */
+    private var consultandoCampanita = false
+
+    /**
+     * La pantalla no pinta números locales hasta que el perfil de la cuenta
+     * fue validado. Así ningún valor pendiente de otra identidad puede
+     * aparecer un instante al cambiar de usuario.
+     */
+    @Volatile
+    private var perfilListo = false
+
+    /**
+     * Refresco del indicador mientras la pantalla está visible.
+     *
+     * No hay push: la app no trae Firebase y el aviso real lo escribe el
+     * servidor al confirmar el pago. Un sondeo cada 30 s es la forma de que el
+     * punto aparezca «solo» sin mantener una conexión abierta.
+     */
+    private val refrescoCampanita = object : Runnable {
+        override fun run() {
+            actualizarCampanita()
+            relojCampanita.postDelayed(this, INTERVALO_CAMPANITA_MS)
+        }
+    }
 
     private var modoPago = ""
 
@@ -115,10 +149,12 @@ class MainActivity : AppCompatActivity() {
         configurarCamposMoneda()
         configurarAcciones()
         configurarQr()
+        configurarNotificaciones()
 
         BottomNavigator.configurar(this, R.id.nav_inicio)
 
-        actualizarDashboard()
+        // El dashboard se pinta cuando `recargarPerfilYSincronizar` confirme
+        // la identidad (o constate que solo falta red).
 
         // Sesión expirada a mitad del uso (el servidor la revocó o el
         // refresh murió): volver al login explicando qué pasó.
@@ -145,6 +181,17 @@ class MainActivity : AppCompatActivity() {
 
         BottomNavigator.sincronizarPestana(this, R.id.nav_inicio)
         actualizarDashboard()
+        iniciarCampanita()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        relojCampanita.removeCallbacks(refrescoCampanita)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        relojCampanita.removeCallbacks(refrescoCampanita)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -176,6 +223,9 @@ class MainActivity : AppCompatActivity() {
         btnTransferencia = findViewById(R.id.btnTransferencia)
         btnAmbos = findViewById(R.id.btnAmbos)
         btnGuardar = findViewById(R.id.btnGuardar)
+
+        btnNotificaciones = findViewById(R.id.btnNotificaciones)
+        txtBadgeNotificaciones = findViewById(R.id.txtBadgeNotificaciones)
 
         comprobantes = ComprobanteController(
             this,
@@ -275,6 +325,105 @@ class MainActivity : AppCompatActivity() {
 
             QrDialog.mostrar(this, qrManager.obtenerQr())
         }
+    }
+
+    // =========================================================================
+    // Notificaciones de la app
+    // =========================================================================
+
+    /**
+     * La campanita abre la bandeja y el indicador se refresca al volver.
+     *
+     * No se pide nada en `onCreate`: la primera consulta la hace
+     * [iniciarCampanita] desde `onResume`, cuando la pantalla ya está pintada.
+     */
+    private fun configurarNotificaciones() {
+
+        btnNotificaciones.setOnClickListener {
+            startActivity(Intent(this, NotificacionesActivity::class.java))
+        }
+    }
+
+    /**
+     * Muestra u oculta la campanita según el rol y arranca el sondeo.
+     *
+     * `GET /notificaciones/mias` solo acepta DRIVER y USER. Un contador usa el
+     * panel de la web, así que en su cuenta la campanita no se pinta: un botón
+     * que solo puede dar 403 es peor que no tenerlo.
+     *
+     * Con el perfil todavía en memoria (`null`, arranque en frío sin red) se
+     * muestra: la app la usan conductores y usuarios individuales, y esconderla
+     * hasta que responda `/auth/yo` la dejaría invisible justo cuando la red va
+     * mal. En cuanto llega el perfil, [puedeVerNotificaciones] la corrige.
+     */
+    private fun iniciarCampanita() {
+
+        if (!puedeVerNotificaciones()) {
+            btnNotificaciones.visibility = View.GONE
+            txtBadgeNotificaciones.visibility = View.GONE
+            relojCampanita.removeCallbacks(refrescoCampanita)
+            return
+        }
+
+        btnNotificaciones.visibility = View.VISIBLE
+
+        actualizarCampanita()
+
+        relojCampanita.removeCallbacks(refrescoCampanita)
+        relojCampanita.postDelayed(refrescoCampanita, INTERVALO_CAMPANITA_MS)
+    }
+
+    /**
+     * ¿Esta cuenta tiene bandeja propia? DRIVER (conductor de empresa) y USER
+     * (usuario individual); el resto no.
+     */
+    private fun puedeVerNotificaciones(): Boolean =
+        when (Diarix.sesion.perfilActual?.rol) {
+            null, ROL_CONDUCTOR, ROL_USUARIO -> true
+            else -> false
+        }
+
+    /**
+     * Pide el resumen y pinta el número de pendientes.
+     *
+     * Un fallo de red NO borra el indicador que ya estaba: un punto que
+     * desaparece porque el móvil perdió cobertura haría creer que el aviso se
+     * leyó. Si la sesión expiró, `SessionManager` avisa por su cuenta.
+     */
+    private fun actualizarCampanita() {
+
+        if (consultandoCampanita) return
+        if (!Diarix.tieneSesion()) return
+        if (!puedeVerNotificaciones()) return
+
+        consultandoCampanita = true
+
+        Diarix.enHiloDeFondo {
+            try {
+                val resumen = Diarix.notificaciones.resumen()
+
+                runOnUiThread {
+                    consultandoCampanita = false
+                    if (isFinishing || isDestroyed) return@runOnUiThread
+                    pintarBadge(resumen.pendientes)
+                }
+            } catch (_: Exception) {
+                runOnUiThread { consultandoCampanita = false }
+            }
+        }
+    }
+
+    private fun pintarBadge(pendientes: Int) {
+
+        if (pendientes <= 0) {
+            txtBadgeNotificaciones.visibility = View.GONE
+            return
+        }
+
+        txtBadgeNotificaciones.text =
+            if (pendientes > 99) "99+" else pendientes.toString()
+
+        txtBadgeNotificaciones.visibility = View.VISIBLE
     }
 
     private fun guardarFactura() {
@@ -397,6 +546,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun actualizarDashboard() {
 
+        if (!perfilListo) return
+
         // El contador se deriva exclusivamente de las facturas del
         // día actual, no de un acumulado histórico ni de un estado
         // caché.
@@ -429,7 +580,13 @@ class MainActivity : AppCompatActivity() {
     // =========================================================================
 
     private fun irAlLogin() {
-        startActivity(Intent(this, LoginActivity::class.java))
+        // CLEAR_TASK evita que "atrás" devuelva a una pantalla privada de la
+        // cuenta anterior después de una expiración.
+        startActivity(
+            Intent(this, LoginActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            }
+        )
         finish()
     }
 
@@ -458,8 +615,23 @@ class MainActivity : AppCompatActivity() {
                 // y nos manda al login. Sin red, seguimos offline.
             }
 
+            // Con la sesión muerta NO se sincroniza ni se pinta nada: el
+            // repositorio de esta actividad aún apuntaba a la cuenta anterior.
+            if (!Diarix.tieneSesion()) return@enHiloDeFondo
+
+            perfilListo = true
+
             val resultado = Diarix.sincronizador.sincronizarPendientes()
-            runOnUiThread { actualizarEstadoSync(resultado) }
+            runOnUiThread {
+                actualizarEstadoSync(resultado)
+                // El plan (y por tanto el cupo "N de 15 facturas") llega en el
+                // perfil recién descargado: refrescar el dashboard aquí evita
+                // que la pantalla siga mostrando el plan en caché del login.
+                actualizarDashboard()
+                // El rol llegó con el perfil: si esta cuenta no tiene bandeja
+                // propia, aquí es donde la campanita desaparece.
+                iniciarCampanita()
+            }
         }
     }
 
@@ -471,6 +643,7 @@ class MainActivity : AppCompatActivity() {
      */
     private fun actualizarEstadoSync(resultado: ResultadoDeSync?) {
         if (!::txtEstadoSync.isInitialized) return
+        if (!perfilListo) return
 
         val pendientes = facturaRepository.contarPendientesDeSincronizacion()
         val enLinea = Diarix.red.hayInternet()
@@ -545,6 +718,13 @@ class MainActivity : AppCompatActivity() {
         const val MODO_AMBOS = "ambos"
 
         private const val CLAVE_MODO_PAGO = "modo_pago"
+
+        /** Roles con bandeja propia en `GET /notificaciones/mias`. */
+        private const val ROL_CONDUCTOR = "DRIVER"
+        private const val ROL_USUARIO = "USER"
+
+        /** 30 s: el mismo ritmo que la bandeja, suficiente para un aviso real. */
+        private const val INTERVALO_CAMPANITA_MS = 30_000L
 
         private val COLOR_VERDE =
             android.graphics.Color.parseColor("#087F5B")

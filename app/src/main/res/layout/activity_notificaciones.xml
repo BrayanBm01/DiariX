@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DIARIX · Bandeja de notificaciones
+
+  Pantalla que abre la campanita de Inicio. No es una pestaña del menú
+  inferior: se entra desde el encabezado y se sale con la flecha, así que no
+  lleva `BottomNavigationView` ni roba un quinto lugar a las secciones.
+
+  Cuatro estados y solo uno visible: Cargando, Vacío, Error y Lista. La
+  paginación la calcula el servidor. El botón "Marcar todas" solo aparece
+  cuando hay pendientes (lo controla la Activity), porque un botón que no
+  puede hacer nada es peor que no tenerlo.
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F0F3FA"
+    android:orientation="vertical">
+
+    <!-- ENCABEZADO -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:elevation="4dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingTop="32dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="12dp">
+
+        <ImageButton
+            android:id="@+id/btnVolverNotificaciones"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Volver"
+            android:padding="10dp"
+            android:rotation="180"
+            android:src="@drawable/ic_chevron"
+            app:tint="#1C2340"/>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Notificaciones"
+                android:textColor="#1C2340"
+                android:textSize="24sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/txtResumenNotificaciones"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="#7A7A9D"
+                android:textSize="13sp"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/btnMarcarTodasNotificaciones"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:gravity="center"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:text="Marcar todas"
+            android:textColor="#0AA87A"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
+    <!-- CONTENIDO: un solo hijo visible cada vez -->
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- 1 · CARGANDO -->
+
+        <ProgressBar
+            android:id="@+id/progresoNotificaciones"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_gravity="center"
+            android:indeterminateTint="#0AA87A"
+            android:visibility="gone"/>
+
+        <!-- 2 · VACÍO -->
+
+        <LinearLayout
+            android:id="@+id/estadoVacioNotificaciones"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_campana"
+                app:tint="#C9D5E8"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:gravity="center"
+                android:text="Todavía no tienes notificaciones"
+                android:textColor="#1C2340"
+                android:textSize="17sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center"
+                android:text="Cuando la empresa confirme un pago o la recepción de un comprobante, el aviso aparecerá aquí."
+                android:textColor="#7A7A9D"
+                android:textSize="14sp"/>
+
+        </LinearLayout>
+
+        <!-- 3 · ERROR -->
+
+        <LinearLayout
+            android:id="@+id/estadoErrorNotificaciones"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="No se pudieron cargar las notificaciones"
+                android:textColor="#1C2340"
+                android:textSize="17sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/txtErrorNotificaciones"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center"
+                android:textColor="#7A7A9D"
+                android:textSize="14sp"/>
+
+            <Button
+                android:id="@+id/btnReintentarNotificaciones"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:backgroundTint="#0AA87A"
+                android:paddingStart="26dp"
+                android:paddingEnd="26dp"
+                android:text="Reintentar"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"/>
+
+        </LinearLayout>
+
+        <!-- 4 · LISTA -->
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/listaNotificaciones"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingStart="16dp"
+            android:paddingTop="14dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="14dp"
+            android:visibility="gone"/>
+
+    </FrameLayout>
+
+    <!-- PAGINACIÓN (solo cuando hay más de una página) -->
+
+    <LinearLayout
+        android:id="@+id/barraPaginacionNotificaciones"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingTop="4dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="10dp"
+        android:visibility="gone">
+
+        <ImageButton
+            android:id="@+id/btnPaginaAnteriorNotificaciones"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Página anterior"
+            android:padding="8dp"
+            android:rotation="180"
+            android:src="@drawable/ic_chevron"
+            app:tint="#0AA87A"/>
+
+        <TextView
+            android:id="@+id/txtPaginaNotificaciones"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textColor="#7A7A9D"
+            android:textSize="13sp"/>
+
+        <ImageButton
+            android:id="@+id/btnPaginaSiguienteNotificaciones"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Página siguiente"
+            android:padding="8dp"
+            android:src="@drawable/ic_chevron"
+            app:tint="#0AA87A"/>
+
+    </LinearLayout>
+
+</LinearLayout>

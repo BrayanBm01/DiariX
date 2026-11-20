@@ -32,6 +32,7 @@ class FacturaRepository(context: Context) {
             put("servidorId", factura.servidorId)
             put("intentos", factura.intentos)
             put("ultimoError", factura.ultimoError)
+            put("comprobanteSubido", if (factura.comprobanteSubido) 1 else 0)
         }
 
         val resultado = db.insert(
@@ -226,7 +227,10 @@ class FacturaRepository(context: Context) {
             ),
             ultimoError = cursor.getString(
                 cursor.getColumnIndexOrThrow("ultimoError")
-            )
+            ),
+            comprobanteSubido = cursor.getInt(
+                cursor.getColumnIndexOrThrow("comprobanteSubido")
+            ) != 0
         )
 
     // =========================================================================
@@ -328,8 +332,81 @@ class FacturaRepository(context: Context) {
         return filas > 0
     }
 
+    /**
+     * Facturas SINCRONIZADAS con comprobante pendiente de subir. Devuelve la
+     * lista en orden de creación para que el archivo llegue en cuanto haya
+     * red, sin esperar a que el usuario vuelva a abrir la app.
+     */
+    fun obtenerPendientesDeComprobante(limite: Int = 10): MutableList<Factura> =
+
+        consultar(
+            """
+            SELECT *
+            FROM facturas
+            WHERE estadoSincronizacion = ?
+              AND servidorId IS NOT NULL
+              AND comprobanteUri IS NOT NULL
+              AND comprobanteSubido = 0
+              AND comprobanteIntentos < ?
+            ORDER BY id ASC
+            LIMIT ?
+            """.trimIndent(),
+            arrayOf(
+                EstadoSincronizacion.SINCRONIZADA,
+                MAX_INTENTOS_COMPROBANTE.toString(),
+                limite.toString()
+            )
+        )
+
+    /** El servidor confirmó el comprobante: no se vuelve a enviar. */
+    fun marcarComprobanteSubido(idFactura: Int): Boolean {
+
+        val db = dbHelper.writableDatabase
+
+        val values = ContentValues().apply {
+            put("comprobanteSubido", 1)
+            put("comprobanteIntentos", 0)
+        }
+
+        val filas = db.update(
+            "facturas",
+            values,
+            "id = ?",
+            arrayOf(idFactura.toString())
+        )
+
+        db.close()
+
+        return filas > 0
+    }
+
+    /**
+     * El envío falló. Se cuenta el intento para dejar de reintentar un
+     * archivo que el servidor rechaza siempre (por ejemplo, uno corrupto).
+     */
+    fun marcarComprobanteFallido(idFactura: Int): Boolean {
+
+        val db = dbHelper.writableDatabase
+
+        db.execSQL(
+            """
+            UPDATE facturas
+            SET comprobanteIntentos = comprobanteIntentos + 1
+            WHERE id = ?
+            """.trimIndent(),
+            arrayOf(idFactura)
+        )
+
+        db.close()
+
+        return true
+    }
+
     companion object {
 
         const val ESTADO_ACTIVA = "ACTIVA"
+
+        /** Tras este número de fallos se deja de reintentar el comprobante. */
+        const val MAX_INTENTOS_COMPROBANTE = 5
     }
 }

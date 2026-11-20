@@ -51,11 +51,26 @@ class AuthApiFalsa(
     val logoutCalls = AtomicInteger(0)
     val yoCalls = AtomicInteger(0)
 
+    /** Access token con el que se llamó a logout por última vez. */
+    var ultimoLogoutAccess: String? = null
+        private set
+
+    /** Refresh token con el que se llamó a logout por última vez. */
+    var ultimoLogoutRefresh: String? = null
+        private set
+
     /** Si está a true, /auth/refresh responde como sesión inválida. */
     var refreshRechazado = false
 
+    /** Código con el que /auth/refresh rechaza cuando [refreshRechazado]. */
+    var codigoDeRechazo: String =
+        com.example.totaldiaria.network.CodigosDelBackend.NO_AUTENTICADO
+
     /** Si está a true, /auth/refresh falla por red. */
     var refreshFallaPorRed = false
+
+    /** Si está a true, /auth/logout falla por red (servidor inalcanzable). */
+    var logoutFallaPorRed = false
 
     /** Perfil devuelto por /auth/yo. */
     var perfil: PerfilActual = perfilDePrueba()
@@ -67,7 +82,7 @@ class AuthApiFalsa(
 
         if (refreshRechazado) {
             throw ErrorDiarix.DeBackend(
-                codigo = com.example.totaldiaria.network.CodigosDelBackend.NO_AUTENTICADO,
+                codigo = codigoDeRechazo,
                 mensaje = "El refresh token no es válido."
             )
         }
@@ -91,7 +106,7 @@ class AuthApiFalsa(
             mensaje = "Correo o contraseña incorrectos."
         )
 
-    override fun loginGoogle(idToken: String): LoginResuelto =
+    override fun loginGoogle(idToken: String, nonce: String?): LoginResuelto =
         throw ErrorDiarix.DeBackend(
             codigo = com.example.totaldiaria.network.CodigosDelBackend.CUENTA_CON_ROL_RESERVADO,
             mensaje = "Este correo pertenece a una cuenta empresarial o de administración."
@@ -99,8 +114,10 @@ class AuthApiFalsa(
 
     override fun logout(accessToken: String?, refreshToken: String?) {
         logoutCalls.incrementAndGet()
+        ultimoLogoutAccess = accessToken
+        ultimoLogoutRefresh = refreshToken
 
-        if (refreshFallaPorRed) throw ErrorDiarix.Red("sin red")
+        if (logoutFallaPorRed) throw ErrorDiarix.Red("sin red")
     }
 
     override fun yo(accessToken: String): PerfilActual {

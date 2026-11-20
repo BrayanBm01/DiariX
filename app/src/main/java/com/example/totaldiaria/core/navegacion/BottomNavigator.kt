@@ -99,7 +99,7 @@ object BottomNavigator {
         sincronizando = true
 
         val destino = if (contieneLaPestana(navView, itemActualId)) itemActualId
-        else inicioDelArea(navView)
+        else inicioDelArea(activity, navView)
 
         if (destino != SIN_PESTANA) navView.selectedItemId = destino
 
@@ -110,17 +110,36 @@ object BottomNavigator {
         (0 until navView.menu.size()).any { navView.menu.getItem(it).itemId == itemId }
 
     /**
-     * El primer item del menú, que en las dos áreas es su pantalla de inicio.
+     * La pantalla de inicio del área, que ya NO es la primera pestaña.
+     *
+     * Facturación reordenó su menú para dejar Inicio en el centro
+     * (Historial, Registros, Inicio, Gráficas, Configuración), así que tomar
+     * `getItem(0)` marcaría Historial al abrir Configuración desde Préstamos o
+     * cualquier pantalla que no sea pestaña. El id se declara por área.
      *
      * Fase 0.1: hay pantallas que NO son una pestaña del área en la que se
      * están viendo, y es a propósito. Configuración se abre desde las dos áreas
      * y `nav_configuracion` solo existe en el menú de facturación: abierta desde
      * Préstamos, marcar esa pestaña dejaría el menú inferior sin nada
-     * seleccionado. En ese caso se marca el inicio del área, que es lo que el
-     * propio menú está diciendo con su única pestaña.
+     * seleccionado. En ese caso se marca el inicio del área.
      */
-    private fun inicioDelArea(navView: BottomNavigationView): Int =
-        if (navView.menu.size() == 0) SIN_PESTANA else navView.menu.getItem(0).itemId
+    private fun inicioDelArea(
+        activity: AppCompatActivity,
+        navView: BottomNavigationView
+    ): Int {
+
+        if (navView.menu.size() == 0) return SIN_PESTANA
+
+        val inicio = when (modoVigente(activity)) {
+            ModoDiarix.FACTURACION -> R.id.nav_inicio
+            ModoDiarix.PRESTAMOS -> R.id.nav_prestamos_inicio
+        }
+
+        // Si el menú inflado no trajera el inicio (configuración incoherente),
+        // se cae a la primera pestaña en vez de dejar la barra sin selección.
+        return if (contieneLaPestana(navView, inicio)) inicio
+        else navView.menu.getItem(0).itemId
+    }
 
     /** `0` no es el id de ningún item de menú, así que es un "no hay" claro. */
     private const val SIN_PESTANA = 0
@@ -165,30 +184,23 @@ object BottomNavigator {
     }
 
     /**
-     * Pestañas del área de FACTURACIÓN: Inicio, Registros, Estadísticas,
-     * Historial y Configuración, en ese orden.
+     * Pestañas del área de FACTURACIÓN en el orden del menú:
+     * Historial, Registros, Inicio, Gráficas y Configuración.
      *
-     * CAMBIO DE RUMBO (pos-Fase 2): la lista vuelve de CUATRO a CINCO. En la
-     * Fase 2, `nav_registros` y `nav_estadisticas` habían dejado de ser
-     * pestañas (se abrían desde los accesos del final de Inicio) y `nav_clientes`
-     * ocupaba su lugar. Eso se revierte: Registros y Estadísticas vuelven a
-     * ser pestañas, y Clientes deja Facturación para vivir en el área de
-     * Préstamos, donde es `nav_prestamos_clientes`.
+     * Inicio va en el CENTRO (tercera de cinco). Por eso [inicioDelArea] ya no
+     * puede asumir que el primer item es el inicio: lo declara por id.
      *
-     * El orden de este mapa es el orden del menú XML, y no es casualidad que
-     * coincidan: `BottomNavigationView` dibuja según el menú y este mapa solo
-     * resuelve a dónde lleva cada uno. Si el menú trajera una pestaña sin
-     * entrada aquí, [destinoPara] devolvería `null` y la pestaña se desmarcaría
-     * sin más (no crashea, pero tampoco lleva a ninguna parte); si este mapa
-     * tuviera una entrada ausente del menú, la pantalla existiría sin forma de
-     * abrirla.
+     * `nav_estadisticas` conserva su id y su pantalla; solo cambia el título
+     * visible a "Gráficas". El orden de este mapa coincide con el del XML para
+     * que ambos se lean igual, aunque `BottomNavigationView` dibuja según el
+     * menú y este mapa solo resuelve destinos.
      */
     private val destinosDeFacturacion =
         mapOf(
-            R.id.nav_inicio to MainActivity::class.java,
-            R.id.nav_registros to RegistrosActivity::class.java,
-            R.id.nav_estadisticas to EstadisticasActivity::class.java,
             R.id.nav_historial to HistorialActivity::class.java,
+            R.id.nav_registros to RegistrosActivity::class.java,
+            R.id.nav_inicio to MainActivity::class.java,
+            R.id.nav_estadisticas to EstadisticasActivity::class.java,
             R.id.nav_configuracion to ConfiguracionActivity::class.java,
         )
 

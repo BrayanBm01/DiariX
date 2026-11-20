@@ -10,37 +10,77 @@ plugins {
 // direcciones de la LAN. Lo único que cambia es la URL del backend, que se
 // inyecta en tiempo de compilación y queda dentro de `BuildConfig`:
 //
-//  - DEBUG  → servidor de desarrollo. Por defecto el host visto desde el
-//             emulador (10.0.2.2 = la máquina que corre Android Studio). Se
-//             puede apuntar a la LAN de desarrollo con
+//  - DEBUG  → el MISMO backend de producción (Render), para que un APK de
+//             debug funcione en cualquier teléfono sin servidor local. Se
+//             puede apuntar a un backend local con
 //             `-PdiarixDebugBaseUrl=http://192.168.x.x:3000/api/v1`, pero
 //             SOLO en debug.
-//  - RELEASE → backend PÚBLICO por HTTPS. NO hay valor por defecto: si no se
-//             define `diarixReleaseBaseUrl`, el build de release FALLA con un
-//             mensaje claro en vez de publicar un APK que solo funcione en la
-//             red del desarrollador. Tampoco se admite una IP privada.
+//  - RELEASE → backend PÚBLICO por HTTPS, con valor por defecto (ver abajo):
+//             `./gradlew :app:bundleRelease` funciona sin recordar ninguna
+//             bandera y SIEMPRE apunta al MISMO backend que usa la web.
+//             Se puede sobreescribir con `-PdiarixReleaseBaseUrl=...` y las
+//             validaciones de abajo siguen aplicando (HTTPS, sin IP privada).
 //
 //   diarixDebugBaseUrl=http://192.168.0.111:3000/api/v1
 //   diarixReleaseBaseUrl=https://api.tu-dominio.com/api/v1
+
+/**
+ * Backend de PRODUCCIÓN de DiariX.
+ *
+ * Es la MISMA URL que usa la web en producción: `VITE_API_URL` de
+ * `Diarix/frontend/.env.production` (`https://diarix-backend.onrender.com/api/v1`).
+ * Que las dos apunten al mismo sitio es la garantía de que una cuenta creada
+ * en la web existe para la app, y viceversa.
+ *
+ * El backend migró de hosting: el dominio antiguo ya no sirve la API
+ * (responde 404 «Application not found» a todo) y una app compilada contra él
+ * fallaba al registrarse e iniciar sesión con
+ * «El servidor no respondió como la API de DiariX (HTTP_404)». El valor viejo
+ * quedó solo en el historial de git.
+ *
+ * Si algún día el backend cambia de dominio, hay que cambiarlo AQUÍ y en
+ * `VITE_API_URL`, y publicar de nuevo la web y la app.
+ */
+val URL_BACKEND_PRODUCCION =
+    "https://diarix-backend.onrender.com/api/v1"
+
+/**
+ * Backend por defecto para DEBUG.
+ *
+ * Es el MISMO backend de producción (Render), no un servidor local: la app de
+ * debug debe poder usarse en un teléfono real sin que el desarrollo esté
+ * encendido. Render arranca en frío, así que los timeouts de red ya están
+ * dimensionados para eso (ver `ApiCliente`).
+ *
+ * Una propiedad `diarixDebugBaseUrl` en `gradle.properties` (del proyecto o del
+ * usuario) puede apuntar a un backend local para pruebas; si queda vieja, es la
+ * causa clásica de «El servidor de DiariX tardó demasiado»: la app intenta
+ * alcanzar una IP que ya no existe.
+ */
 val diarixDebugBaseUrl =
-    providers.gradleProperty("diarixDebugBaseUrl").getOrElse("http://10.0.2.2:3000/api/v1")
+    providers.gradleProperty("diarixDebugBaseUrl").getOrElse(URL_BACKEND_PRODUCCION)
 
 val diarixReleaseBaseUrl =
-    providers.gradleProperty("diarixReleaseBaseUrl").getOrElse("")
+    providers.gradleProperty("diarixReleaseBaseUrl").getOrElse(URL_BACKEND_PRODUCCION)
 
 /** IP privada, loopback o el host del emulador: nunca en release. */
 val direccionSoloDesarrollo = Regex(
     """^https?://(localhost|127\.|0\.0\.0\.0|10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)""",
 )
 
-// Web OAuth Client ID de Google (Fase 4): es el MISMO valor que el backend
-// acepta en `GOOGLE_CLIENT_ID`. Con este id la app pide un idToken cuyo
-// `aud` coincide con lo que verifica el servidor.
-// Dejar vacío solo deshabilita el botón "Continuar con Google" en esta
-// versión de la app; el acceso empresarial sigue funcionando.
-//   diarixGoogleWebClientId=xxxxx.apps.googleusercontent.com
+// Web OAuth Client ID de Google: es el MISMO valor que el backend acepta en
+// `GOOGLE_CLIENT_ID` y el que usa la web en `VITE_GOOGLE_CLIENT_ID`.
+// Con Credential Manager, `GetGoogleIdOption.setServerClientId(...)` hace que
+// el `idToken` devuelto tenga este valor como `aud`, que es lo que valida el
+// servidor. Está en UN solo sitio: aquí (BuildConfig). Los Client IDs de tipo
+// Android solo se registran en Google Cloud; NO se escriben en el proyecto.
+//
+// Se puede sobreescribir sin editar el archivo:
+//   -PdiarixGoogleWebClientId=...  o  DIARIX_GOOGLE_WEB_CLIENT_ID=...
 val diarixGoogleWebClientId =
-    providers.gradleProperty("diarixGoogleWebClientId").getOrElse("")
+    providers.gradleProperty("diarixGoogleWebClientId")
+        .orElse(providers.environmentVariable("DIARIX_GOOGLE_WEB_CLIENT_ID"))
+        .getOrElse("817402741819-66kejag11k8aq1078an532eb7ld87vjg.apps.googleusercontent.com")
 
 android {
     namespace = "com.example.totaldiaria"
@@ -75,6 +115,10 @@ android {
         debug {
             // Desarrollo: puede ser HTTP (emulador o LAN de desarrollo).
             buildConfigField("String", "DIARIX_BASE_URL", "\"$diarixDebugBaseUrl\"")
+            // El sufijo hace visible en Ajustes/`dumpsys` que se instaló un
+            // build de desarrollo. Fue justo lo que faltó para detectar que el
+            // APK del teléfono no era el release que se creía.
+            versionNameSuffix = "-debug"
         }
         release {
             isMinifyEnabled = false
@@ -123,6 +167,17 @@ tasks.matching { it.name == "preReleaseBuild" }.configureEach {
             "diarixReleaseBaseUrl no puede ser localhost ni una IP privada: $url. " +
                 "El APK debe funcionar desde cualquier Wi-Fi y con datos móviles."
         }
+
+        // Un release sin este valor entra en la rama local que deshabilita el
+        // botón de Google: el usuario ve un error y NINGUNA petición llega al
+        // backend. Antes era solo un aviso; fallar aquí evita publicar otro APK
+        // con el botón mudo. El valor por defecto ya vive en este archivo.
+        check(diarixGoogleWebClientId.isNotBlank()) {
+            "Falta el Web Client ID de Google. Pásalo con " +
+                "-PdiarixGoogleWebClientId=... o con la variable " +
+                "DIARIX_GOOGLE_WEB_CLIENT_ID, y configura el MISMO valor en " +
+                "GOOGLE_CLIENT_ID del backend."
+        }
     }
 }
 dependencies {
@@ -138,8 +193,11 @@ dependencies {
 
     // Fase 4 · Conectividad con DiariX
     implementation(libs.okhttp)
-    // Fase 4 · Google Sign-In (usuario individual)
-    implementation(libs.play.services.auth)
+    // Google Sign-In con Credential Manager (usuario individual).
+    // `credentials-play-services-auth` aporta el proveedor de Google Play Services.
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)

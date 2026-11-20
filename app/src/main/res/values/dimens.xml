@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Avatar grande de «Ver y editar perfil». -->
+    <dimen name="avatar_perfil_tamano">112dp</dimen>
+    <!-- Avatar de solo lectura que se muestra en Configuración. -->
+    <dimen name="avatar_configuracion_tamano">56dp</dimen>
+</resources>

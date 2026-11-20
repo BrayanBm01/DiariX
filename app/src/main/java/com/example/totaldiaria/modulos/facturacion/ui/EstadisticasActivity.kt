@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.example.totaldiaria.Diarix
+import com.example.totaldiaria.core.navegacion.exigirSesion
 import com.example.totaldiaria.R
 import com.example.totaldiaria.core.navegacion.BottomNavigator
 import com.example.totaldiaria.modulos.facturacion.servicio.EstadisticasService
@@ -57,6 +58,7 @@ class EstadisticasActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!exigirSesion()) return
         setContentView(R.layout.activity_estadisticas)
 
         window.statusBarColor =
@@ -64,8 +66,6 @@ class EstadisticasActivity : AppCompatActivity() {
 
         WindowInsetsControllerCompat(window, window.decorView)
             .isAppearanceLightStatusBars = true
-
-        Diarix.iniciar(this)
 
         estadisticasService = EstadisticasService(this)
 

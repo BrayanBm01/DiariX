@@ -10,6 +10,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.example.totaldiaria.R
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -71,7 +72,6 @@ class ConfiguracionTest {
         listOf(
             "filaEditarPerfil" to R.id.filaEditarPerfil,
             "filaModo" to R.id.filaModo,
-            "filaCerrarSesionTodos" to R.id.filaCerrarSesionTodos,
             "filaQr" to R.id.filaQr,
             "filaExportar" to R.id.filaExportar,
             "filaImportar" to R.id.filaImportar,
@@ -85,6 +85,54 @@ class ConfiguracionTest {
                 raiz.findViewById<View>(id)
             )
         }
+    }
+
+    /**
+     * Configuración SOLO muestra el avatar de esta cuenta.
+     *
+     * La gestión de la foto se trasladó a «Ver y editar perfil»: aquí no debe
+     * quedar la fila duplicada que abría el diálogo antiguo.
+     */
+    @Test
+    fun `la foto de perfil se muestra pero no se gestiona aqui`() {
+
+        val raiz = pantalla()
+
+        assertNull(
+            "La fila para cambiar la foto debe estar solo en Ver y editar perfil",
+            raiz.findViewById<View>(R.id.filaCambiarFoto)
+        )
+
+        assertNotNull(
+            "Falta el hueco de la foto de perfil",
+            raiz.findViewById<View>(R.id.imgFotoPerfil)
+        )
+
+        assertNotNull(
+            "Falta el avatar de iniciales",
+            raiz.findViewById<View>(R.id.txtIniciales)
+        )
+    }
+
+    /**
+     * La opción "cerrar sesión en todos los dispositivos" ya no existe.
+     *
+     * La gestión de sesiones es del servidor: una cuenta tiene una sola sesión
+     * y el logout normal la revoca. Si alguien vuelve a añadir la fila, este
+     * test lo detecta.
+     */
+    @Test
+    fun `no existe la opcion de cerrar sesion en todos los dispositivos`() {
+
+        assertEquals(
+            "La gestión de sesiones corresponde al servidor, no a una opción de Ajustes",
+            0,
+            context.resources.getIdentifier(
+                "filaCerrarSesionTodos",
+                "id",
+                context.packageName
+            )
+        )
     }
 
     /**

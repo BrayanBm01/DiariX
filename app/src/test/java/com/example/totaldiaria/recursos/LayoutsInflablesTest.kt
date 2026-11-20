@@ -87,7 +87,6 @@ class LayoutsInflablesTest {
      */
     @Test
     fun `las graficas de estadisticas usan las clases que existen de verdad`() {
-
         val raiz = LayoutInflater.from(context)
             .inflate(R.layout.activity_estadisticas, null, false)
 
@@ -109,9 +108,118 @@ class LayoutsInflablesTest {
         }
     }
 
+    /**
+     * El encabezado ya no lleva el QR: lleva la campanita. El único QR de la
+     * pantalla vive DENTRO de la tarjeta del total, compartiendo padre con el
+     * monto. Es una comprobación estructural, no visual: si alguien vuelve a
+     * poner un segundo QR arriba, el padre del QR de la tarjeta deja de ser el
+     * esperado y falla.
+     */
+    @Test
+    fun `el QR vive dentro de la tarjeta del total y la campanita en el encabezado`() {
+
+        val raiz = LayoutInflater.from(context)
+            .inflate(R.layout.activity_main, null, false)
+
+        val qr = raiz.findViewById<View>(R.id.imgQr)
+        val total = raiz.findViewById<View>(R.id.txtTotal)
+        val campanita = raiz.findViewById<View>(R.id.btnNotificaciones)
+
+        assertNotNull("Falta el QR de la tarjeta del total", qr)
+        assertNotNull("Falta el total del día", total)
+        assertNotNull("Falta la campanita del encabezado", campanita)
+
+        // qr -> LinearLayout horizontal de la tarjeta
+        // total -> LinearLayout vertical de textos -> el mismo horizontal
+        assertTrue(
+            "El QR debe compartir tarjeta con el total, no vivir en el encabezado",
+            qr.parent === total.parent.parent,
+        )
+    }
+
+    /**
+     * El QR de la tarjeta es discreto: 48dp, el objetivo táctil mínimo.
+     *
+     * Antes medía 76dp y dominaba la tarjeta. Si alguien vuelve a agrandarlo,
+     * este test lo detecta. Sigue siendo tocable: 48dp es el mínimo que
+     * recomienda Material.
+     */
+    @Test
+    fun `el QR de la tarjeta mide 48dp`() {
+
+        val raiz = LayoutInflater.from(context)
+            .inflate(R.layout.activity_main, null, false)
+
+        val qr = raiz.findViewById<View>(R.id.imgQr)
+
+        assertNotNull("Falta el QR de la tarjeta del total", qr)
+
+        val ladoEsperado = (48 * context.resources.displayMetrics.density).toInt()
+
+        assertEquals(
+            "El QR debe seguir siendo compacto (48dp)",
+            ladoEsperado,
+            qr.layoutParams.width,
+        )
+        assertEquals(
+            "El QR debe ser cuadrado",
+            ladoEsperado,
+            qr.layoutParams.height,
+        )
+    }
+
     // ----------------------------------------------------------------
     // La lista no se queda corta sin que nadie lo note
     // ----------------------------------------------------------------
+
+    /**
+     * La gestión visual de la foto vive en «Ver y editar perfil».
+     *
+     * Se comprueba que el avatar es más grande que el antiguo (56dp) y que
+     * están las tres acciones pedidas: cambiar desde la galería, volver a la
+     * foto de Google y el diálogo con zoom y vista previa.
+     */
+    @Test
+    fun `ver y editar perfil gestiona la foto de forma exclusiva`() {
+        val perfil = LayoutInflater.from(context)
+            .inflate(R.layout.activity_editar_perfil, null, false)
+
+        val avatar = perfil.findViewById<View>(R.id.imgAvatarPerfil)
+        assertNotNull("Falta el avatar de la foto", avatar)
+
+        val esperado = context.resources.getDimensionPixelSize(R.dimen.avatar_perfil_tamano)
+        assertTrue(
+            "El avatar debe ser más grande que el antiguo de 56dp",
+            (avatar.parent as View).layoutParams.width >= esperado
+        )
+
+        assertNotNull(
+            "Faltan las iniciales cuando no hay foto",
+            perfil.findViewById<View>(R.id.txtInicialesPerfil)
+        )
+        assertNotNull(
+            "Falta cambiar fotografía",
+            perfil.findViewById<View>(R.id.filaCambiarFoto)
+        )
+        assertNotNull(
+            "Falta volver a la foto de Google",
+            perfil.findViewById<View>(R.id.filaUsarFotoGoogle)
+        )
+
+        val ajuste = LayoutInflater.from(context)
+            .inflate(R.layout.dialogo_ajuste_foto, null, false)
+
+        assertNotNull(
+            "Falta el recorte circular interactivo",
+            ajuste.findViewById<View>(R.id.vistaRecorteFoto)
+        )
+        assertNotNull("Falta alejar", ajuste.findViewById<View>(R.id.btnZoomMenos))
+        assertNotNull("Falta acercar", ajuste.findViewById<View>(R.id.btnZoomMas))
+        assertNotNull(
+            "Falta la vista previa del resultado",
+            ajuste.findViewById<View>(R.id.imgVistaPreviaFoto)
+        )
+    }
 
     /**
      * Si se añade un layout y no se registra en [LAYOUTS], este test falla.
@@ -188,13 +296,17 @@ class LayoutsInflablesTest {
             R.layout.activity_editar_perfil,
             R.layout.activity_ayuda,
             R.layout.activity_acerca_de,
+            R.layout.activity_notificaciones,
             R.layout.dialog_selector_modo,
             R.layout.dialog_comprobante,
             R.layout.dialog_editar_factura,
             R.layout.dialog_qr,
+            R.layout.dialogo_foto_perfil,
+            R.layout.dialogo_ajuste_foto,
             R.layout.item_factura,
             R.layout.item_papelera,
             R.layout.item_registro,
+            R.layout.item_notificacion,
         )
     }
 }

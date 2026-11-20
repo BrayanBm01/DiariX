@@ -3,10 +3,25 @@ package com.example.totaldiaria.modulos.facturacion.repositorio
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import com.example.totaldiaria.core.cuenta.CuentaLocal
 import java.util.UUID
 
-class DatabaseHelper(context: Context) :
-    SQLiteOpenHelper(context, "facturas.db", null, 8) {
+/**
+ * Base SQLite privada de una cuenta.
+ *
+ * El esquema sigue siendo el de siempre (versión 9): lo único que cambia es el
+ * NOMBRE del archivo. Así dos cuentas independientes no comparten tablas ni el
+ * índice global de `clientUid`, sin necesidad de migrar columnas.
+ */
+class DatabaseHelper(
+    context: Context,
+    ownerId: String = CuentaLocal.id(),
+) : SQLiteOpenHelper(context, nombrePara(ownerId), null, 9) {
+
+    companion object {
+        fun nombrePara(ownerId: String): String = CuentaLocal.nombreBase(ownerId)
+    }
+
 
     override fun onCreate(db: SQLiteDatabase) {
 
@@ -24,7 +39,9 @@ class DatabaseHelper(context: Context) :
                 estadoSincronizacion TEXT NOT NULL DEFAULT 'PENDIENTE',
                 servidorId TEXT,
                 intentos INTEGER NOT NULL DEFAULT 0,
-                ultimoError TEXT
+                ultimoError TEXT,
+                comprobanteSubido INTEGER NOT NULL DEFAULT 0,
+                comprobanteIntentos INTEGER NOT NULL DEFAULT 0
             )
             """.trimIndent()
         )
@@ -256,6 +273,34 @@ class DatabaseHelper(context: Context) :
             // consolidado en `registros`. Solo las activas de este momento
             // reciben clientUid para sincronizarse.
             asignarUuidsAFacturasActivas(db)
+        }
+
+        // VERSIÓN 9: subida del comprobante al servidor.
+        //
+        // El móvil guardaba la foto en `filesDir`, pero nunca la enviaba:
+        // el panel web no podía verla. Ahora se sube justo después de que el
+        // servidor confirma la factura y se marca para no repetirla.
+        if (oldVersion < 9) {
+
+            try {
+                db.execSQL(
+                    """
+                    ALTER TABLE facturas
+                    ADD COLUMN comprobanteSubido INTEGER NOT NULL DEFAULT 0
+                    """.trimIndent()
+                )
+            } catch (_: Exception) {
+            }
+
+            try {
+                db.execSQL(
+                    """
+                    ALTER TABLE facturas
+                    ADD COLUMN comprobanteIntentos INTEGER NOT NULL DEFAULT 0
+                    """.trimIndent()
+                )
+            } catch (_: Exception) {
+            }
         }
     }
 

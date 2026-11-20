@@ -2,11 +2,14 @@ package com.example.totaldiaria.modulos.facturacion.preferencias
 
 import android.content.Context
 import android.net.Uri
+import com.example.totaldiaria.core.cuenta.CuentaLocal
 import java.io.File
 
 class QrManager(private val context: Context) {
 
-    private val nombreArchivo = "qr.png"
+    /** El QR también es privado de la cuenta que lo eligió. */
+    private val nombreArchivo: String
+        get() = "qr_${CuentaLocal.id()}.png"
 
     fun guardarQr(uri: Uri): Boolean {
 

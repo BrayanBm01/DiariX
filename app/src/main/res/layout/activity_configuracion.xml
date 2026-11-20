@@ -124,16 +124,35 @@
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
-                        <TextView
-                            android:id="@+id/txtIniciales"
-                            android:layout_width="56dp"
-                            android:layout_height="56dp"
-                            android:background="@drawable/bg_avatar"
-                            android:gravity="center"
-                            android:text="—"
-                            android:textColor="#0AA87A"
-                            android:textSize="20sp"
-                            android:textStyle="bold" />
+                        <!--
+                          Avatar: las iniciales son el fondo elegante cuando no
+                          hay imagen; imgFotoPerfil se superpone SOLO si esta
+                          cuenta tiene foto guardada.
+                        -->
+                        <FrameLayout
+                            android:layout_width="@dimen/avatar_configuracion_tamano"
+                            android:layout_height="@dimen/avatar_configuracion_tamano">
+
+                            <TextView
+                                android:id="@+id/txtIniciales"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@drawable/bg_avatar"
+                                android:gravity="center"
+                                android:text="—"
+                                android:textColor="#0AA87A"
+                                android:textSize="20sp"
+                                android:textStyle="bold" />
+
+                            <ImageView
+                                android:id="@+id/imgFotoPerfil"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:contentDescription="@string/perfil_foto"
+                                android:scaleType="fitCenter"
+                                android:visibility="gone" />
+
+                        </FrameLayout>
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -166,6 +185,12 @@
                         </LinearLayout>
 
                     </LinearLayout>
+
+                    <!--
+                      La GESTIÓN de la foto (elegir, ajustar, volver a Google)
+                      vive en «Ver y editar perfil». Aquí solo se muestra el
+                      avatar de esta cuenta; no hay botón duplicado.
+                    -->
 
                     <!--
                       CUENTA VINCULADA A GOOGLE
@@ -391,71 +416,6 @@
                                 android:textSize="12sp" />
 
                         </LinearLayout>
-
-                    </LinearLayout>
-
-                    <View style="@style/SeparadorDeFila" />
-
-                    <!--
-                      CERRAR SESIÓN EN TODOS LOS DISPOSITIVOS
-
-                      Con chevron porque abre una confirmación. Existe porque el
-                      backend ya la tenía (`POST /auth/logout-todos`) y "Sesión y
-                      seguridad" con una sola opción no es una sección.
-                    -->
-
-                    <LinearLayout
-                        android:id="@+id/filaCerrarSesionTodos"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?android:attr/selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingStart="20dp"
-                        android:paddingTop="16dp"
-                        android:paddingEnd="20dp"
-                        android:paddingBottom="16dp">
-
-                        <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:contentDescription="@string/configuracion_cerrar_todos"
-                            android:src="@drawable/ic_seguridad"
-                            app:tint="#7A7A9D" />
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="14dp"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="@string/configuracion_cerrar_todos"
-                                android:textColor="#1C2340"
-                                android:textSize="15sp"
-                                android:textStyle="bold" />
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:text="@string/configuracion_cerrar_todos_ayuda"
-                                android:textColor="#7A7A9D"
-                                android:textSize="12sp" />
-
-                        </LinearLayout>
-
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:contentDescription="@string/configuracion_cerrar_todos"
-                            android:src="@drawable/ic_chevron"
-                            app:tint="#8C8C8C" />
 
                     </LinearLayout>
 

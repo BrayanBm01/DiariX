@@ -1,10 +1,15 @@
 package com.example.totaldiaria.core.cuenta
 
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -14,6 +19,7 @@ import com.example.totaldiaria.network.ErrorDiarix
 import com.example.totaldiaria.sesion.PerfilEditable
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import java.io.ByteArrayOutputStream
 
 /**
  * DIARIX · Fase 0.1 · Editar perfil.
@@ -32,10 +38,11 @@ import com.google.android.material.textfield.TextInputEditText
  *    cinco segundos. Se enseña arriba, en lectura, con la explicación al lado.
  *  - **Rol, empresa y plan.** Los fija el servidor (invitación de empresa, CLI
  *    del primer administrador). Nadie se cambia su propio rol.
- *  - **Foto.** No hay columna de avatar en `users` ni el backend conserva la de
- *    Google, así que no hay nada que editar. El avatar de Configuración son las
- *    iniciales del nombre real, y en cuanto exista la columna se sustituye el
- *    dibujo por la imagen.
+ *  - **Foto.** Aquí es donde se gestiona: circular, grande, con ajuste de zoom
+ *    y posición antes de guardar. El backend no tiene columna de avatar, así
+ *    que la foto vive SOLO en el almacenamiento privado de esta cuenta
+ *    ([FotoPerfilStore]): la personalizada manda sobre la de Google y nada se
+ *    sobrescribe hasta que la persona confirma con «Guardar».
  *
  * ## Guardado
  *
@@ -58,9 +65,23 @@ class EditarPerfilActivity : AppCompatActivity() {
     private lateinit var btnGuardar: MaterialButton
     private lateinit var progreso: ProgressBar
 
+    // Foto de perfil: avatar grande y filas de gestión (solo esta pantalla).
+    private lateinit var imgAvatarPerfil: ImageView
+    private lateinit var txtInicialesPerfil: TextView
+    private lateinit var filaCambiarFoto: View
+    private lateinit var filaUsarFotoGoogle: View
+    private lateinit var fotoStore: FotoPerfilStore
+
     /** Con lo que se abre la pantalla, para saber qué ha cambiado de verdad. */
     private var nombreOriginal = ""
     private var telefonoOriginal = ""
+
+    private val seleccionarFoto =
+        registerForActivityResult(
+            ActivityResultContracts.GetContent()
+        ) { uri: Uri? ->
+            uri?.let { abrirAjusteDeFoto(it) }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -84,14 +105,31 @@ class EditarPerfilActivity : AppCompatActivity() {
         btnGuardar = findViewById(R.id.btnGuardarPerfil)
         progreso = findViewById(R.id.progresoGuardar)
 
+        imgAvatarPerfil = findViewById(R.id.imgAvatarPerfil)
+        txtInicialesPerfil = findViewById(R.id.txtInicialesPerfil)
+        filaCambiarFoto = findViewById(R.id.filaCambiarFoto)
+        filaUsarFotoGoogle = findViewById(R.id.filaUsarFotoGoogle)
+        fotoStore = FotoPerfilStore(this)
+
         // Se abre con lo que ya hay en memoria y se sustituye en cuanto llegue
         // el perfil detallado. Escribir los campos antes de que llegue la red
         // evita que alguien empiece a escribir su nombre encima de un campo que
         // se rellena un segundo después y se lo borre.
         pintarCon(perfilDeLaSesion())
+        pintarAvatar()
+        sincronizarFotoDeGoogle()
         cargarPerfil()
 
         btnGuardar.setOnClickListener { guardar() }
+
+        filaCambiarFoto.setOnClickListener {
+            seleccionarFoto.launch("image/*")
+        }
+
+        filaUsarFotoGoogle.setOnClickListener {
+            fotoStore.usarFotoDeGoogle()
+            pintarAvatar()
+        }
     }
 
     private fun perfilDeLaSesion(): PerfilEditable {
@@ -141,7 +179,154 @@ class EditarPerfilActivity : AppCompatActivity() {
         etiquetaGoogle.visibility =
             if (Diarix.sesion.esCuentaDeGoogle()) View.VISIBLE
             else View.GONE
+
+        // El avatar de iniciales sigue al nombre, también al cambiarlo aquí.
+        txtInicialesPerfil.text = inicialesDe(perfil)
     }
+
+    // =======================================================================
+    // Foto de perfil (solo esta pantalla)
+    // =======================================================================
+
+    /** Pinta la foto de ESTA cuenta, circular; sin foto, las iniciales. */
+    private fun pintarAvatar() {
+        // El ImageView es `match_parent` dentro del FrameLayout: su
+        // layoutParams.width es -1, así que el lado real sale del recurso.
+        val lado = resources.getDimensionPixelSize(R.dimen.avatar_perfil_tamano)
+
+        val archivo = fotoStore.fotoActual()
+        val decodada = archivo?.takeIf { it.exists() }?.let {
+            runCatching { FotoCircular.decodificar(it) }.getOrNull()
+        }
+
+        val circular = FotoCircular.recortarCircular(decodada, lado)
+
+        if (circular == null) {
+            imgAvatarPerfil.setImageDrawable(null)
+            imgAvatarPerfil.visibility = View.GONE
+            txtInicialesPerfil.visibility = View.VISIBLE
+        } else {
+            imgAvatarPerfil.setImageBitmap(circular)
+            imgAvatarPerfil.visibility = View.VISIBLE
+            txtInicialesPerfil.visibility = View.GONE
+        }
+
+        // «Usar foto de Google» solo tiene sentido si lo que se muestra es la
+        // personalizada y existe la de Google a la que volver.
+        filaUsarFotoGoogle.visibility =
+            if (fotoStore.usandoPersonalizada() && fotoStore.tieneFotoGoogle()) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+    }
+
+    /**
+     * La foto de Google no la guarda el backend: llega en la respuesta del
+     * login y se copia UNA vez al almacenamiento privado de la cuenta, para
+     * que siga disponible sin red y no se confunda con la de otra persona.
+     */
+    private fun sincronizarFotoDeGoogle() {
+        val url = Diarix.sesion.fotoGoogleDeSesion() ?: fotoStore.urlGoogle()
+
+        if (url == null || fotoStore.tieneFotoGoogle()) return
+
+        Diarix.enHiloDeFondo {
+            val descargada = runCatching { fotoStore.descargarGoogle(url) }
+                .getOrDefault(false)
+
+            if (descargada) runOnUiThread { pintarAvatar() }
+        }
+    }
+
+    /** Galería → bytes decodificados → diálogo de ajuste. */
+    private fun abrirAjusteDeFoto(uri: Uri) {
+        val bytes = runCatching {
+            contentResolver.openInputStream(uri)?.use { it.readBytes() }
+        }.getOrNull()
+
+        val original = bytes?.takeIf { it.isNotEmpty() }?.let {
+            runCatching { FotoCircular.decodificar(it) }.getOrNull()
+        }
+
+        if (original == null) {
+            Toast.makeText(this, R.string.perfil_foto_error, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        mostrarDialogoAjuste(original)
+    }
+
+    /**
+     * Ajuste con zoom y desplazamiento. NADA se guarda hasta que la persona
+     * pulse «Guardar»: cancelar cierra el diálogo y la foto anterior queda
+     * intacta.
+     */
+    private fun mostrarDialogoAjuste(original: Bitmap) {
+        val vista = layoutInflater.inflate(R.layout.dialogo_ajuste_foto, null)
+        val recorte = vista.findViewById<VistaRecorteCircular>(R.id.vistaRecorteFoto)
+        val vistaPrevia = vista.findViewById<ImageView>(R.id.imgVistaPreviaFoto)
+
+        recorte.setImagen(original)
+
+        fun refrescarVistaPrevia() {
+            val previa = runCatching { recorte.recortar(LADO_VISTA_PREVIA) }.getOrNull()
+            vistaPrevia.setImageBitmap(previa)
+        }
+
+        recorte.alAjustar = { refrescarVistaPrevia() }
+        // La vista aún no tiene tamaño mientras se infla el diálogo: la primera
+        // vista previa se calcula después del primer layout, y no antes.
+        recorte.post { refrescarVistaPrevia() }
+
+        vista.findViewById<View>(R.id.btnZoomMas).setOnClickListener {
+            recorte.masZoom()
+            refrescarVistaPrevia()
+        }
+
+        vista.findViewById<View>(R.id.btnZoomMenos).setOnClickListener {
+            recorte.menosZoom()
+            refrescarVistaPrevia()
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.perfil_ajustar_foto_titulo)
+            .setView(vista)
+            .setPositiveButton(R.string.perfil_foto_guardar) { _, _ ->
+                guardarFotoAjustada(recorte)
+            }
+            .setNegativeButton(R.string.perfil_foto_cancelar, null)
+            .show()
+    }
+
+    /** Recorta lo que se ve en el círculo y lo guarda para ESTA cuenta. */
+    private fun guardarFotoAjustada(recorte: VistaRecorteCircular) {
+        val circular = recorte.recortar(LADO_GUARDADO)
+
+        if (circular == null) {
+            Toast.makeText(this, R.string.perfil_foto_error, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val bytes = ByteArrayOutputStream().use { salida ->
+            circular.compress(Bitmap.CompressFormat.PNG, 100, salida)
+            salida.toByteArray()
+        }
+
+        if (!fotoStore.guardarPersonalizada(bytes)) {
+            Toast.makeText(this, R.string.perfil_foto_error, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        pintarAvatar()
+
+        Toast.makeText(this, R.string.perfil_foto_guardada, Toast.LENGTH_SHORT).show()
+    }
+
+    /** Iniciales del avatar; el «—» cuando el nombre aún no llegó. */
+    private fun inicialesDe(perfil: PerfilEditable): String =
+        PerfilEditable.iniciales(perfil.nombreCompleto)
+            .ifEmpty { getString(R.string.perfil_inicial_vacio) }
 
     /**
      * Valida y guarda.
@@ -244,5 +429,11 @@ class EditarPerfilActivity : AppCompatActivity() {
         /** Los mismos topes que `ActualizarPerfilDto` del backend. */
         const val MAX_NOMBRE = 160
         const val MAX_TELEFONO = 32
+
+        /** Lado del PNG guardado: nítido en el avatar y ligero en disco. */
+        const val LADO_GUARDADO = 512
+
+        /** Lado de la miniatura de vista previa del diálogo de ajuste. */
+        const val LADO_VISTA_PREVIA = 128
     }
 }

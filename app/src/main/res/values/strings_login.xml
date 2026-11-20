@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+    Textos visibles exclusivos del login. No se usa ninguno desde código:
+    solo cambian la presentación; las acciones siguen enlazadas a los mismos
+    ids y listeners de LoginActivity.kt.
+-->
+<resources>
+    <string name="login_bienvenido_titulo">Bienvenido de nuevo</string>
+    <string name="login_bienvenido_subtitulo">Inicia sesión para continuar</string>
+    <string name="login_nit_hint">NIT de la empresa (opcional)</string>
+    <string name="login_correo_hint">Correo electrónico</string>
+    <string name="login_password_hint">Contraseña</string>
+    <string name="login_iniciar_sesion">Iniciar sesión</string>
+    <string name="login_separador">o continúa con</string>
+    <string name="login_continuar_con_google">Continuar con Google</string>
+    <string name="login_pie">DiariX · tus facturas, siempre contigo</string>
+</resources>

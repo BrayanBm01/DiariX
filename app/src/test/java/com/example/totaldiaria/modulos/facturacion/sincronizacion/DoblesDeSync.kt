@@ -9,6 +9,8 @@ import com.example.totaldiaria.network.ResultadoDeSincronizacion
 import com.example.totaldiaria.network.ResumenDeSincronizacion
 import com.example.totaldiaria.sesion.TokensDeSesion
 import com.example.totaldiaria.modulos.facturacion.servicio.DiaService
+import com.example.totaldiaria.modulos.facturacion.servicio.AlmacenDeComprobantes
+import com.example.totaldiaria.modulos.facturacion.servicio.ComprobanteParaSubir
 import com.example.totaldiaria.network.ErrorDiarix
 import com.example.totaldiaria.sesion.UsoDiario
 import java.util.concurrent.CountDownLatch
@@ -40,6 +42,8 @@ class RepositorioDeSyncFalso(
 
     val marcadasSincronizadas = mutableListOf<Pair<Int, String>>()
     val marcadasRechazadas = mutableListOf<Triple<Int, String, Int>>()
+    val comprobantesSubidos = mutableListOf<Int>()
+    val comprobantesFallidos = mutableListOf<Int>()
 
     override fun obtenerPendientes(limite: Int): List<Factura> =
         filas
@@ -76,6 +80,31 @@ class RepositorioDeSyncFalso(
         }
         return true
     }
+
+    override fun obtenerPendientesDeComprobante(limite: Int): List<Factura> =
+        filas
+            .filter {
+                it.estadoSincronizacion == EstadoSincronizacion.SINCRONIZADA &&
+                    it.servidorId != null &&
+                    it.comprobanteUri != null &&
+                    !it.comprobanteSubido
+            }
+            .take(limite)
+
+    override fun marcarComprobanteSubido(idFactura: Int): Boolean {
+        comprobantesSubidos += idFactura
+
+        filas.reemplazarSi({ it.id == idFactura }) {
+            it.copy(comprobanteSubido = true)
+        }
+
+        return true
+    }
+
+    override fun marcarComprobanteFallido(idFactura: Int): Boolean {
+        comprobantesFallidos += idFactura
+        return true
+    }
 }
 
 /** Sustituye in situ la primera fila que cumpla el predicado. */
@@ -98,6 +127,18 @@ class FacturasApiFalsa : FacturasApi(ApiCliente("http://localhost:0/api/v1")) {
 
     /** Si se asigna, la llamada falla con este error. */
     var error: ErrorDiarix? = null
+
+    /** Si se asigna, la subida del comprobante falla con este error. */
+    var errorAlAdjuntar: ErrorDiarix? = null
+
+    data class ComprobanteEnviado(
+        val facturaId: String,
+        val nombre: String,
+        val mime: String,
+        val bytes: Int,
+    )
+
+    val comprobantesEnviados = mutableListOf<ComprobanteEnviado>()
 
     /** Si se asigna, la llamada espera a esta señal (para probar vuelo único). */
     var espera: CountDownLatch? = null
@@ -127,19 +168,37 @@ class FacturasApiFalsa : FacturasApi(ApiCliente("http://localhost:0/api/v1")) {
             restantes = 12,
         )
 
+    override fun adjuntarComprobante(
+        accessToken: String,
+        facturaId: String,
+        nombre: String,
+        mime: String,
+        archivo: ByteArray,
+    ) {
+        comprobantesEnviados += ComprobanteEnviado(facturaId, nombre, mime, archivo.size)
+
+        errorAlAdjuntar?.let { throw it }
+    }
+
     companion object {
         fun factura(
             id: Int,
             clientUid: String = "uid-$id",
-            estado: String = EstadoSincronizacion.PENDIENTE
+            estado: String = EstadoSincronizacion.PENDIENTE,
+            servidorId: String? = null,
+            comprobanteUri: String? = null,
+            comprobanteSubido: Boolean = false,
         ) = Factura(
             id = id,
             numeroFactura = "F-$id",
             efectivo = 10_000.0,
             transferencia = 0.0,
             fecha = "01/10/2026 10:00",
+            comprobanteUri = comprobanteUri,
             clientUid = clientUid,
             estadoSincronizacion = estado,
+            servidorId = servidorId,
+            comprobanteSubido = comprobanteSubido,
         )
 
         /** Todas las facturas del lote quedan sincronizadas. */
@@ -204,3 +263,24 @@ internal fun tokensVigentes(ahora: Long) =
         accessExpiraAtMs = ahora + 15 * 60_000L,
         refreshExpiraAtMs = ahora + 30 * 24 * 60 * 60_000L,
     )
+
+/**
+ * Almacén de comprobantes simulado: devuelve un archivo fijo y registra qué
+ * URI se leyó. Sirve para comprobar que la sincronización sube la foto real.
+ */
+class AlmacenDeComprobantesFalso(
+    var contenido: ComprobanteParaSubir? =
+        ComprobanteParaSubir(
+            bytes = byteArrayOf(0xFF.toByte(), 0xD8.toByte(), 0xFF.toByte()),
+            mime = "image/jpeg",
+            nombre = "comprobante.jpg",
+        )
+) : AlmacenDeComprobantes {
+
+    val leidos = mutableListOf<String>()
+
+    override fun leerParaSubir(uriTexto: String): ComprobanteParaSubir? {
+        leidos += uriTexto
+        return contenido
+    }
+}

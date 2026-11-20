@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.totaldiaria.R
 import com.example.totaldiaria.core.navegacion.BottomNavigator
+import com.example.totaldiaria.core.navegacion.exigirSesion
 import com.example.totaldiaria.modulos.facturacion.adaptador.PapeleraAdapter
 import com.example.totaldiaria.modulos.facturacion.adaptador.RegistroAdapter
 import com.example.totaldiaria.modulos.facturacion.modelo.PapeleraItem
@@ -44,6 +45,7 @@ class RegistrosActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!exigirSesion()) return
         setContentView(R.layout.activity_registros)
 
         window.statusBarColor =

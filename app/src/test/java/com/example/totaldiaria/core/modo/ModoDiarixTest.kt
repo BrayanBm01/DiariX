@@ -171,14 +171,14 @@ class ModoDiarixTest {
     // ----------------------------------------------------------------
 
     @Test
-    fun `el menu de facturacion conserva sus cinco pestanas`() {
+    fun `el menu de facturacion tiene sus cinco pestanas con inicio al centro`() {
 
         assertEquals(
             listOf(
-                R.id.nav_inicio,
-                R.id.nav_registros,
-                R.id.nav_estadisticas,
                 R.id.nav_historial,
+                R.id.nav_registros,
+                R.id.nav_inicio,
+                R.id.nav_estadisticas,
                 R.id.nav_configuracion,
             ),
             itemsDelMenu(MenuDeModo.de(ModoDiarix.FACTURACION))

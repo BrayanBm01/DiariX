@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+    Margen lateral del login. En móvil aprovecha el ancho; en pantallas
+    grandes centra la tarjeta sin dejar un formulario excesivamente ancho.
+-->
+<resources>
+    <dimen name="login_margen_horizontal">24dp</dimen>
+</resources>

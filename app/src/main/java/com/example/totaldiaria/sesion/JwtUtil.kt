@@ -24,6 +24,24 @@ object JwtUtil {
     fun expiraAtMs(accessToken: String, refreshToken: String): Pair<Long, Long> =
         expDe(accessToken) to expDe(refreshToken)
 
+    /**
+     * `sub` del access token. Es la identidad firmada por el backend y se
+     * usa solo como respaldo si una respuesta antigua no trae `usuario.id`.
+     * Igual que `exp`: se lee, no se valida.
+     */
+    fun subDe(token: String): String? {
+        val partes = token.split(".")
+        if (partes.size < 2) return null
+
+        val payload = runCatching {
+            String(Base64.getUrlDecoder().decode(partes[1]), Charsets.UTF_8)
+        }.getOrNull() ?: return null
+
+        return Regex("\"sub\"\\s*:\\s*\"([^\"]+)\"")
+            .find(payload)?.groupValues?.get(1)
+            ?.takeIf { it.isNotBlank() }
+    }
+
     private fun expDe(token: String): Long {
         val partes = token.split(".")
         if (partes.size < 2) return Long.MAX_VALUE

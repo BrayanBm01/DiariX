@@ -345,48 +345,6 @@ class UsuariosApiTest {
     }
 
     // ----------------------------------------------------------------
-    // POST /auth/logout-todos
-    // ----------------------------------------------------------------
-
-    @Test
-    fun `cerrar la sesion en otros dispositivos va a la ruta correcta`() {
-
-        servidor.enqueue(MockResponse().setBody("""{"sesionesRevocadas":3}"""))
-
-        val cerradas = api.cerrarSesionEnTodosLosDispositivos("mi-token")
-
-        val peticion = primera()
-
-        assertEquals(3, cerradas)
-        assertEquals("POST", peticion.method)
-        assertEquals("/api/v1/auth/logout-todos", peticion.path)
-        assertEquals("Bearer mi-token", peticion.getHeader("Authorization"))
-    }
-
-    @Test
-    fun `sin sesiones que revocar el numero es cero y no un fallo`() {
-
-        servidor.enqueue(MockResponse().setBody("""{"sesionesRevocadas":0}"""))
-
-        assertEquals(0, api.cerrarSesionEnTodosLosDispositivos("token"))
-    }
-
-    /**
-     * El número de sesiones se lee del nombre que devuelve el backend.
-     *
-     * Si el campo no viniera con ese nombre, `optInt` daría 0 y la app
-     * diría "se cerraron 0 sesiones" aunque hubiera cerrado cinco, que es peor
-     * que un error: el usuario cree que ha funcionado.
-     */
-    @Test
-    fun `el numero de sesiones revocadas viene del backend y no se inventa`() {
-
-        servidor.enqueue(MockResponse().setBody("""{"sesionesRevocadas":1}"""))
-
-        assertEquals(1, api.cerrarSesionEnTodosLosDispositivos("token"))
-    }
-
-    // ----------------------------------------------------------------
     // El perfil se reconstruye bien a partir de la respuesta
     // ----------------------------------------------------------------
 

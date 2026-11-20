@@ -33,17 +33,29 @@ open class AuthApi(private val api: ApiCliente) {
 
         val respuesta = api.postJson(RUTA_LOGIN, cuerpo = cuerpo)
 
+        val usuario = usuarioDe(respuesta)
         return LoginResuelto(
             tokens = tokensDe(respuesta),
             rol = rolDe(respuesta),
-            email = usuarioDe(respuesta).optString("email", email),
+            email = usuario.optString("email", email),
             empresa = empresaDe(JSONObject(respuesta)),
             cuentaNueva = optBoolean(respuesta, "cuentaNueva"),
+            usuarioId = usuario.optString("id"),
+            fotoUrl = usuario.optString("fotoUrl").takeIf { it.isNotBlank() },
         )
     }
 
-    open fun loginGoogle(idToken: String): LoginResuelto {
-        val cuerpo = JSONObject().apply { put("idToken", idToken) }
+    /**
+     * `POST /auth/google`. El campo es exactamente `idToken` (contrato del
+     * backend, ver `LoginGoogleDto`). El `nonce` es OPCIONAL: la app Android lo
+     * genera por intento (anti-replay) y el backend exige que coincida con el
+     * claim `nonce` del token. La web no lo manda.
+     */
+    open fun loginGoogle(idToken: String, nonce: String? = null): LoginResuelto {
+        val cuerpo = JSONObject().apply {
+            put("idToken", idToken)
+            nonce?.takeIf { it.isNotBlank() }?.let { put("nonce", it) }
+        }
         return loginResueltoDe(api.postJson(RUTA_GOOGLE, cuerpo = cuerpo))
     }
 
@@ -97,12 +109,15 @@ open class AuthApi(private val api: ApiCliente) {
 
     private fun loginResueltoDe(respuesta: String): LoginResuelto {
         val json = JSONObject(respuesta)
+        val usuario = usuarioDe(respuesta)
         return LoginResuelto(
             tokens = tokensDe(respuesta),
             rol = rolDe(respuesta),
-            email = usuarioDe(respuesta).optString("email"),
+            email = usuario.optString("email"),
             empresa = empresaDe(json),
             cuentaNueva = optBoolean(respuesta, "cuentaNueva"),
+            usuarioId = usuario.optString("id"),
+            fotoUrl = usuario.optString("fotoUrl").takeIf { it.isNotBlank() },
         )
     }
 

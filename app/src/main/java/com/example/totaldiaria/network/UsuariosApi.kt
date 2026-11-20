@@ -81,19 +81,6 @@ open class UsuariosApi(private val api: ApiCliente) {
         return miPerfil(accessToken)
     }
 
-    /**
-     * Cierra la sesión en TODOS los dispositivos (Fase 0.1).
-     *
-     * Ya existía en el backend (`POST /auth/logout-todos`) y devuelve cuántas
-     * sesiones revocó. Se añade a la API porque "Sesión y seguridad" no puede
-     * ser una sección con una sola opción: revocar el acceso desde un teléfono
-     * que se perdió es la medida que la gente busca cuando busca.
-     */
-    open fun cerrarSesionEnTodosLosDispositivos(accessToken: String): Int =
-        JSONObject(
-            api.postJson(RUTA_LOGOUT_TODOS, token = accessToken, cuerpo = JSONObject())
-        ).optInt("sesionesRevocadas", 0)
-
     // ------------------------------------------------------------------
     // Lectura de JSON que no confunde "vacío" con "nulo"
     // ------------------------------------------------------------------
@@ -126,6 +113,5 @@ open class UsuariosApi(private val api: ApiCliente) {
 
     private companion object {
         const val RUTA_YO = "/usuarios/yo"
-        const val RUTA_LOGOUT_TODOS = "/auth/logout-todos"
     }
 }

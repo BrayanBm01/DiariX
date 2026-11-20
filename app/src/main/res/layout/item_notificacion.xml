@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DIARIX · Fila de una notificación
+
+  Misma tarjeta blanca que `item_factura` y `item_cliente`: el aviso se lee
+  como una pieza más del listado y no como una pantalla distinta. El icono de
+  la izquierda distingue un pago (verde) de un comprobante (azul) sin añadir
+  texto; el punto de la derecha marca lo NO leído, y desaparece al abrirla.
+
+  Los textos los pone el adaptador, incluida la fecha y el número de factura.
+-->
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardBackgroundColor="#FFFFFF"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="14dp">
+
+        <!-- ICONO DEL TIPO -->
+
+        <FrameLayout
+            android:id="@+id/contenedorIconoNotificacion"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_punto_verde">
+
+            <ImageView
+                android:id="@+id/imgIconoNotificacion"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_pagos"
+                app:tint="#FFFFFF"/>
+
+        </FrameLayout>
+
+        <!-- TEXTO -->
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txtTituloNotificacion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="#1C2340"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:hint="Pago confirmado"/>
+
+            <TextView
+                android:id="@+id/txtMensajeNotificacion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="#5A6182"
+                android:textSize="13sp"
+                android:hint="Tu pago por transferencia ha sido verificado y confirmado correctamente."/>
+
+            <TextView
+                android:id="@+id/txtMetaNotificacion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="#7A7A9D"
+                android:textSize="12sp"
+                android:hint="Factura #000 · $0"/>
+
+            <TextView
+                android:id="@+id/txtFechaNotificacion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="#9AA3B8"
+                android:textSize="12sp"
+                android:hint="00/00/0000 00:00"/>
+
+        </LinearLayout>
+
+        <!-- PENDIENTE -->
+
+        <ImageView
+            android:id="@+id/puntoNoLeida"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/bg_punto_verde"
+            android:importantForAccessibility="no"/>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

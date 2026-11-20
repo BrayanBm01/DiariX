@@ -11,6 +11,11 @@ local.properties
 .cxx/
 captures/
 
+# Entorno (por si se añaden secretos de compilación más adelante)
+.env
+.env.local
+
 # Claves privadas de firma Android
 *.jks
 *.keystore
+keystore.properties

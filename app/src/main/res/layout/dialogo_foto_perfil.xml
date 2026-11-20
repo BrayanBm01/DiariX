@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <ImageView
+        android:id="@+id/imgVistaPreviaFoto"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:background="@drawable/bg_avatar"
+        android:contentDescription="@string/perfil_foto"
+        android:scaleType="centerCrop" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:text="@string/perfil_foto_elegir"
+        android:textColor="#5A6182"
+        android:textSize="13sp" />
+
+    <Button
+        android:id="@+id/btnElegirFoto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="@string/perfil_foto_elegir" />
+
+</LinearLayout>

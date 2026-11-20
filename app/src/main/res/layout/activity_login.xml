@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-    Pantalla de acceso a DiariX.
+    Pantalla de acceso a DiariX — rediseño visual exclusivo.
 
-    NOTA IMPORTANTE (Fase 4): este layout es SOLO presentación. Los ids
-    (edtNit, edtEmail, edtPassword, btnEntrar, btnGoogle, txtError, progreso)
-    son los mismos que usa LoginActivity.kt: la lógica de autenticación no se
-    toca. El campo "Usuario" sigue siendo el correo que espera el backend y
-    el campo NIT conserva su teclado numérico.
+    Los ids (edtNit, edtEmail, edtPassword, btnEntrar, btnGoogle, txtError,
+    progreso, loginContenido) y los atributos funcionales (inputType,
+    imeOptions, visibilidad, enabled) son los MISMOS que usa LoginActivity.kt.
+    Solo cambian presentación, textos visibles y recursos con prefijo login_.
 -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -22,39 +21,46 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal|center_vertical"
         android:orientation="vertical"
-        android:paddingStart="24dp"
-        android:paddingTop="40dp"
-        android:paddingEnd="24dp"
-        android:paddingBottom="32dp">
+        android:paddingStart="@dimen/login_margen_horizontal"
+        android:paddingTop="32dp"
+        android:paddingEnd="@dimen/login_margen_horizontal"
+        android:paddingBottom="24dp">
 
-        <!-- LOGO DIARIX -->
+        <!-- MARCA -->
 
         <ImageView
             android:id="@+id/imgLogo"
-            android:layout_width="212dp"
-            android:layout_height="56dp"
+            android:layout_width="196dp"
+            android:layout_height="52dp"
             android:adjustViewBounds="true"
             android:contentDescription="Logotipo de DiariX"
             android:scaleType="fitCenter"
             android:src="@drawable/diarix_logotipo" />
+
+        <!-- Acento de marca: una línea fina, sin decoración recargada. -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="3dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/login_accent" />
 
         <!-- BIENVENIDA -->
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="Bienvenido a DiariX"
+            android:layout_marginTop="18dp"
+            android:text="@string/login_bienvenido_titulo"
             android:textColor="@color/texto_principal_dark"
-            android:textSize="27sp"
+            android:textSize="24sp"
             android:textStyle="bold" />
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:gravity="center"
-            android:text="Gestiona tus facturas de forma fácil y segura"
+            android:text="@string/login_bienvenido_subtitulo"
             android:textColor="@color/gris_etiqueta"
             android:textSize="14sp" />
 
@@ -63,36 +69,40 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="26dp"
+            android:layout_marginTop="24dp"
             app:cardBackgroundColor="@color/white"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="2dp">
+            app:cardCornerRadius="24dp"
+            app:cardElevation="1dp"
+            app:strokeColor="@color/borde_suave"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingStart="20dp"
+                android:paddingStart="24dp"
                 android:paddingTop="24dp"
-                android:paddingEnd="20dp"
-                android:paddingBottom="24dp">
+                android:paddingEnd="24dp"
+                android:paddingBottom="20dp">
 
-                <!-- NIT -->
+                <!-- NIT (el código lo envía como null si está vacío) -->
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:hint="@string/login_nit_hint"
                     app:boxBackgroundColor="@color/white"
-                    app:boxCornerRadiusBottomEnd="16dp"
-                    app:boxCornerRadiusBottomStart="16dp"
-                    app:boxCornerRadiusTopEnd="16dp"
-                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxCornerRadiusBottomEnd="14dp"
+                    app:boxCornerRadiusBottomStart="14dp"
+                    app:boxCornerRadiusTopEnd="14dp"
+                    app:boxCornerRadiusTopStart="14dp"
                     app:boxStrokeColor="@color/borde_campo"
-                    android:hint="NIT"
+                    app:boxStrokeWidth="1dp"
+                    app:boxStrokeWidthFocused="2dp"
                     app:hintTextColor="@color/etiqueta_campo"
                     app:startIconDrawable="@drawable/ic_nit"
-                    app:startIconTint="@color/gris_etiqueta">
+                    app:startIconTint="@color/login_icono_campo">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/edtNit"
@@ -106,23 +116,25 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- USUARIO -->
+                <!-- CORREO (mismo campo de siempre; antes se etiquetaba "Usuario") -->
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="12dp"
+                    android:hint="@string/login_correo_hint"
                     app:boxBackgroundColor="@color/white"
-                    app:boxCornerRadiusBottomEnd="16dp"
-                    app:boxCornerRadiusBottomStart="16dp"
-                    app:boxCornerRadiusTopEnd="16dp"
-                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxCornerRadiusBottomEnd="14dp"
+                    app:boxCornerRadiusBottomStart="14dp"
+                    app:boxCornerRadiusTopEnd="14dp"
+                    app:boxCornerRadiusTopStart="14dp"
                     app:boxStrokeColor="@color/borde_campo"
-                    android:hint="Usuario"
+                    app:boxStrokeWidth="1dp"
+                    app:boxStrokeWidthFocused="2dp"
                     app:hintTextColor="@color/etiqueta_campo"
                     app:startIconDrawable="@drawable/ic_usuario"
-                    app:startIconTint="@color/gris_etiqueta">
+                    app:startIconTint="@color/login_icono_campo">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/edtEmail"
@@ -136,24 +148,26 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- CONTRASEÑA (con mostrar/ocultar nativo de Material) -->
+                <!-- CONTRASEÑA (toggle nativo de Material, sin lógica nueva) -->
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="12dp"
+                    android:hint="@string/login_password_hint"
                     app:boxBackgroundColor="@color/white"
-                    app:boxCornerRadiusBottomEnd="16dp"
-                    app:boxCornerRadiusBottomStart="16dp"
-                    app:boxCornerRadiusTopEnd="16dp"
-                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxCornerRadiusBottomEnd="14dp"
+                    app:boxCornerRadiusBottomStart="14dp"
+                    app:boxCornerRadiusTopEnd="14dp"
+                    app:boxCornerRadiusTopStart="14dp"
                     app:boxStrokeColor="@color/borde_campo"
+                    app:boxStrokeWidth="1dp"
+                    app:boxStrokeWidthFocused="2dp"
                     app:endIconMode="password_toggle"
-                    android:hint="Contraseña"
                     app:hintTextColor="@color/etiqueta_campo"
                     app:startIconDrawable="@drawable/ic_password"
-                    app:startIconTint="@color/gris_etiqueta">
+                    app:startIconTint="@color/login_icono_campo">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/edtPassword"
@@ -167,16 +181,21 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- ERROR (oculto hasta que haga falta) -->
+                <!-- ERROR (oculto hasta que LoginActivity lo muestra) -->
 
                 <TextView
                     android:id="@+id/txtError"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/login_error_bg"
                     android:gravity="center"
+                    android:paddingStart="12dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="12dp"
+                    android:paddingBottom="10dp"
                     android:textColor="@color/texto_error"
-                    android:textSize="14sp"
+                    android:textSize="13sp"
                     android:visibility="gone" />
 
                 <!-- BOTÓN PRINCIPAL -->
@@ -185,25 +204,25 @@
                     android:id="@+id/btnEntrar"
                     style="@style/Widget.Material3.Button"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="20dp"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="18dp"
                     android:insetBottom="0dp"
                     android:insetTop="0dp"
-                    android:text="INGRESAR"
+                    android:text="@string/login_iniciar_sesion"
                     android:textAllCaps="false"
                     android:textColor="@color/texto_boton_ingresar"
-                    android:textSize="17sp"
+                    android:textSize="16sp"
                     android:textStyle="bold"
                     app:backgroundTint="@color/bg_boton_ingresar"
-                    app:cornerRadius="16dp" />
+                    app:cornerRadius="14dp" />
 
                 <!-- SEPARADOR -->
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="22dp"
-                    android:layout_marginBottom="18dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="14dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
@@ -218,9 +237,9 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
                         android:layout_marginEnd="12dp"
-                        android:text="o"
+                        android:text="@string/login_separador"
                         android:textColor="@color/gris_etiqueta"
-                        android:textSize="13sp" />
+                        android:textSize="12sp" />
 
                     <View
                         android:layout_width="0dp"
@@ -230,35 +249,37 @@
 
                 </LinearLayout>
 
-                <!-- BOTÓN GOOGLE -->
+                <!-- BOTÓN GOOGLE: mismo id y mismo listener que antes -->
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnGoogle"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="52dp"
                     android:insetBottom="0dp"
                     android:insetTop="0dp"
-                    android:text="Registrarme con Google"
+                    android:text="@string/login_continuar_con_google"
                     android:textAllCaps="false"
                     android:textColor="@color/texto_principal_dark"
-                    android:textSize="16sp"
-                    app:cornerRadius="16dp"
+                    android:textSize="15sp"
+                    app:backgroundTint="@color/white"
+                    app:cornerRadius="14dp"
                     app:icon="@drawable/ic_google"
+                    app:iconTint="@null"
                     app:iconGravity="textStart"
-                    app:iconPadding="12dp"
+                    app:iconPadding="10dp"
                     app:iconSize="20dp"
                     app:strokeColor="@color/borde_suave"
                     app:strokeWidth="1dp" />
 
-                <!-- PROGRESO -->
+                <!-- PROGRESO: lo controla setOcupado() en LoginActivity -->
 
                 <ProgressBar
                     android:id="@+id/progreso"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginTop="16dp"
                     android:indeterminateTint="@color/verde_pago"
                     android:visibility="gone" />
 
@@ -269,13 +290,13 @@
         <!-- PIE -->
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="26dp"
+            android:layout_marginTop="20dp"
             android:gravity="center"
-            android:text="DiariX · tus facturas, siempre contigo"
+            android:text="@string/login_pie"
             android:textColor="@color/gris_etiqueta"
-            android:textSize="12sp" />
+            android:textSize="11sp" />
 
     </LinearLayout>
 

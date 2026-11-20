@@ -34,6 +34,8 @@ class TokenStoreSeguro(
                 // entera por un campo que solo sirve para una etiqueta sería
                 // un desastre por un detalle.
                 conGoogle = json.optBoolean("conGoogle", false),
+                ownerId = json.optString("ownerId", ""),
+                fotoUrl = json.optString("fotoUrl", "").takeIf { it.isNotBlank() },
             )
         } catch (_: Exception) {
             // Archivo ilegible: mejor no tener sesión que una rota.
@@ -48,6 +50,8 @@ class TokenStoreSeguro(
             put("accessExpiraAtMs", tokens.accessExpiraAtMs)
             put("refreshExpiraAtMs", tokens.refreshExpiraAtMs)
             put("conGoogle", tokens.conGoogle)
+            put("ownerId", tokens.ownerId)
+            tokens.fotoUrl?.let { put("fotoUrl", it) }
         }
         almacen.guardar(json.toString().toByteArray(Charsets.UTF_8))
     }

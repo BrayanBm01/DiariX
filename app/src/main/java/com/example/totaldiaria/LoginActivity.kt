@@ -7,29 +7,38 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updatePadding
+import androidx.credentials.CredentialManager
+import androidx.credentials.CredentialManagerCallback
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.GetCredentialResponse
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.GetCredentialInterruptedException
+import androidx.credentials.exceptions.GetCredentialProviderConfigurationException
+import androidx.credentials.exceptions.GetCredentialUnsupportedException
+import androidx.credentials.exceptions.NoCredentialException
 import com.example.totaldiaria.core.modo.AlmacenDeModo
 import com.example.totaldiaria.core.modo.SelectorDeModo
 import com.example.totaldiaria.core.modo.abrirSeleccionDeModo
 import com.example.totaldiaria.network.ErrorDiarix
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import java.security.SecureRandom
+import java.util.Base64
 
 /**
  * Pantalla de entrada (Fase 4) con los DOS métodos de acceso:
  *
- *  - "Registrarme con Google" → alta/acceso de usuario INDIVIDUAL. El backend
- *    se reserva el derecho de rechazar con un mensaje claro si el correo
- *    pertenece a una cuenta empresarial o de administración
+ *  - "Entrar con Google" → alta/acceso de usuario INDIVIDUAL con Credential
+ *    Manager. El backend se reserva el derecho de rechazar con un mensaje claro
+ *    si el correo pertenece a una cuenta empresarial o de administración
  *    (CUENTA_CON_ROL_RESERVADO).
  *  - "INGRESAR" (NIT + usuario + contraseña) → contadores y conductores de una
  *    empresa.
@@ -50,30 +59,10 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var txtError: TextView
     private lateinit var progreso: ProgressBar
 
-    private var clienteGoogle: GoogleSignInClient? = null
+    private lateinit var credentialManager: CredentialManager
 
-    private val resultadoGoogle =
-        registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ) { resultado ->
-            val cuenta = try {
-                GoogleSignIn.getSignedInAccountFromIntent(resultado.data)
-                    .getResult(ApiException::class.java)
-            } catch (_: ApiException) {
-                // El usuario canceló o el intent falló: no es un error de la
-                // app, se vuelve a mostrar la pantalla en silencio.
-                null
-            }
-
-            val idToken = cuenta?.idToken
-            if (idToken == null) {
-                setOcupado(false)
-                mostrarError("No se pudo completar el acceso con Google. Intenta de nuevo.")
-                return@registerForActivityResult
-            }
-
-            entrarConGoogle(idToken, cuenta)
-        }
+    /** Nonce anti-replay del intento EN CURSO; viaja al backend junto al token. */
+    private var nonceDeEsteIntento: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,6 +77,10 @@ class LoginActivity : AppCompatActivity() {
             abrirPrincipal()
             return
         }
+
+        // Render free tier se duerme: despertarlo mientras el usuario escribe
+        // evita que el primer login cargue con todo el arranque en frío.
+        Diarix.precalentar()
 
         setContentView(R.layout.activity_login)
 
@@ -143,9 +136,9 @@ class LoginActivity : AppCompatActivity() {
         val webClientId = BuildConfig.DIARIX_GOOGLE_WEB_CLIENT_ID
 
         if (webClientId.isBlank()) {
-            // La versión no trae el Web Client ID (configuración pendiente):
-            // el botón explica cómo acceder mientras tanto. Nunca inventamos
-            // credenciales ni dejamos un botón muerto.
+            // Configuración pendiente: nunca inventamos credenciales ni dejamos
+            // un botón muerto. El valor por defecto ya trae el Web Client ID,
+            // así que esto solo ocurre si se sobreescribe con un valor vacío.
             btnGoogle.setOnClickListener {
                 mostrarError(
                     "El acceso con Google aún no está disponible en esta versión de la app. " +
@@ -155,20 +148,130 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
-        val opciones = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(webClientId)
-            .requestEmail()
-            .build()
-
-        clienteGoogle = GoogleSignIn.getClient(this, opciones)
+        credentialManager = CredentialManager.create(this)
 
         btnGoogle.setOnClickListener {
             ocultarError()
-            clienteGoogle?.let { cliente ->
-                setOcupado(true)
-                resultadoGoogle.launch(cliente.signInIntent)
-            }
+            setOcupado(true)
+            pedirCredencialGoogle(webClientId)
         }
+    }
+
+    /**
+     * Credential Manager con `GetGoogleIdOption`:
+     *
+     *  - `setServerClientId` usa el Web Client ID (BuildConfig), que es el
+     *    `aud` que el backend verifica.
+     *  - `setFilterByAuthorizedAccounts(false)` para ofrecer también cuentas
+     *    de Google que aún no han autorizado la app (alta de usuarios nuevos).
+     *  - `setNonce` con 32 bytes aleatorios en base64url, para impedir replay.
+     *
+     * Se usa la variante asíncrona con callback (`getCredentialAsync`) para no
+     * añadir corutinas solo para esta pantalla.
+     */
+    private fun pedirCredencialGoogle(webClientId: String) {
+        // Nonce anti-replay: se genera POR INTENTO, se incrusta en la petición
+        // a Google y se envía al backend junto al token, que exige que el claim
+        // `nonce` del idToken sea exactamente este.
+        val nonce = nonceAleatorio()
+        nonceDeEsteIntento = nonce
+
+        val opcionGoogle = GetGoogleIdOption.Builder()
+            .setServerClientId(webClientId)
+            .setFilterByAuthorizedAccounts(false)
+            .setAutoSelectEnabled(false)
+            .setNonce(nonce)
+            .build()
+
+        val solicitud = GetCredentialRequest.Builder()
+            .addCredentialOption(opcionGoogle)
+            .build()
+
+        credentialManager.getCredentialAsync(
+            this,
+            solicitud,
+            null,
+            ContextCompat.getMainExecutor(this),
+            object : CredentialManagerCallback<GetCredentialResponse, GetCredentialException> {
+                override fun onResult(result: GetCredentialResponse) {
+                    val idToken = idTokenDeGoogle(result.credential)
+
+                    if (idToken == null) {
+                        setOcupado(false)
+                        nonceDeEsteIntento = null
+                        mostrarError(
+                            "No se recibió una credencial de Google válida. Inténtalo nuevamente."
+                        )
+                        return
+                    }
+
+                    entrarConGoogle(idToken, nonce)
+                }
+
+                override fun onError(e: GetCredentialException) {
+                    setOcupado(false)
+                    nonceDeEsteIntento = null
+
+                    val mensaje = when (e) {
+                        // El usuario cerró la hoja de Google: no es un fallo.
+                        is GetCredentialCancellationException ->
+                            "Acceso con Google cancelado."
+                        // No hay cuenta elegible: ni autorizada ni nueva.
+                        is NoCredentialException ->
+                            "No hay cuentas de Google disponibles en este dispositivo. " +
+                                "Añade una cuenta de Google e inténtalo nuevamente."
+                        // El dispositivo no puede dialogar con Google.
+                        is GetCredentialUnsupportedException ->
+                            "Este dispositivo no puede usar el acceso con Google. " +
+                                "Actualiza Servicios de Google Play e inténtalo de nuevo."
+                        is GetCredentialProviderConfigurationException ->
+                            "No hay un proveedor de cuentas de Google disponible en este dispositivo."
+                        is GetCredentialInterruptedException ->
+                            "La verificación con Google se interrumpió. Inténtalo nuevamente."
+                        // Fallo real de red/infraestructura de Google.
+                        else ->
+                            "No se pudo conectar con Google. " +
+                                "Revisa tu conexión e inténtalo nuevamente."
+                    }
+
+                    mostrarError(mensaje)
+                }
+            },
+        )
+    }
+
+    /**
+     * Extrae el idToken de la credencial devuelta.
+     *
+     * ⚠ AQUÍ ESTABA EL FALLO: el proveedor de Google Play Services NO entrega
+     * una instancia de `GoogleIdTokenCredential`, sino una `CustomCredential`
+     * genérica con los datos en su bundle (`Credential.Companion.createFrom`).
+     * El chequeo `is GoogleIdTokenCredential` fallaba SIEMPRE y el login moría
+     * con "No se pudo completar el acceso con Google" antes de llegar al
+     * backend. El patrón oficial de la documentación es comprobar el TIPO y
+     * rehidratar con `GoogleIdTokenCredential.createFrom(credential.data)`.
+     * Se acepta también la credencial ya tipada, por si un proveedor futuro la
+     * entrega así.
+     */
+    private fun idTokenDeGoogle(credencial: androidx.credentials.Credential): String? {
+        val idToken = when {
+            credencial is GoogleIdTokenCredential -> credencial.idToken
+
+            credencial is CustomCredential &&
+                credencial.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL ->
+                GoogleIdTokenCredential.createFrom(credencial.data).idToken
+
+            else -> null
+        }
+
+        return idToken?.takeIf { it.isNotBlank() }
+    }
+
+    /** 32 bytes aleatorios, codificados como base64url sin relleno. */
+    private fun nonceAleatorio(): String {
+        val bytes = ByteArray(32)
+        SecureRandom().nextBytes(bytes)
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
     }
 
     private fun configurarAcciones() {
@@ -237,15 +340,17 @@ class LoginActivity : AppCompatActivity() {
     // Acceso con Google
     // =========================================================================
 
-    private fun entrarConGoogle(idToken: String, cuenta: GoogleSignInAccount) {
+    /**
+     * El idToken viaja a `POST /auth/google` con el campo `idToken`
+     * (ver `AuthApi.loginGoogle`). `SessionManager` guarda access y refresh en
+     * el mismo almacén seguro que el login con contraseña.
+     */
+    private fun entrarConGoogle(idToken: String, nonce: String?) {
         setOcupado(true)
 
         Diarix.enHiloDeFondo {
-            // La cuenta seleccionada en Google puede NO ser la última usada:
-            // se firma la real para que Google la ofrezca de nuevo la próxima
-            // vez, sin afectar a la sesión de DiariX.
             val resultado = try {
-                Diarix.sesion.entrarConGoogle(idToken)
+                Diarix.sesion.entrarConGoogle(idToken, nonce)
                 null
             } catch (e: ErrorDiarix) {
                 e.mensajeAmigable
@@ -253,12 +358,13 @@ class LoginActivity : AppCompatActivity() {
 
             runOnUiThread {
                 setOcupado(false)
+                nonceDeEsteIntento = null
                 if (resultado == null) {
                     abrirPrincipal()
                 } else {
-                    // El correo pertenece a una cuenta empresarial o el token
-                    // no fue válido: se muestra el mensaje del backend y se
-                    // queda en la pantalla SIN cambiar nada.
+                    // Mensaje del backend (token inválido, cuenta empresarial,
+                    // sesión activa en otro dispositivo…) en español y seguro
+                    // de mostrar. La pantalla queda SIN cambiar nada.
                     mostrarError(resultado)
                 }
             }
